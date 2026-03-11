@@ -1,0 +1,141 @@
+html,
+body {
+    padding: 0;
+    margin: 0;
+    height: 100%;
+}
+
+arcgis-search {
+    display: flex;
+    margin-right: 1em;
+}
+
+.foresty-theme {
+    --calcite-color-brand: #529853;
+    --calcite-color-brand-hover: #427A43;
+    --calcite-color-brand-press: #406340;
+    --calcite-color-text-1: #406340;
+    --calcite-color-text-2: #003600;
+    --calcite-color-focus: #bfd4bf;
+    --calcite-color-foreground-2: #d5e1d525;
+    --calcite-color-foreground-3: #EDEDED;
+    --calcite-navigation-background-color: #dfeae2;
+}
+
+arcgis-code-editor {
+    height: 100%;
+}
+
+calcite-navigation-logo {
+    --calcite-ui-icon-color: var(--calcite-color-brand);
+}
+
+calcite-navigation {
+    --calcite-color-text-1: #003600;
+}
+
+arcgis-elevation-profile {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+#elevation-panel {
+    box-shadow: none;
+    border: none;
+    height: 400px;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    border-radius: 0;
+    border-top: 1px solid var(--calcite-color-border-3);
+}
+
+#elevation-panel calcite-chip-group {
+    margin-inline-end: .5rem;
+}
+
+calcite-shell-panel[slot="panel-bottom"] {
+    margin-bottom: 1rem;
+}
+
+.esri-ui-corner .esri-component {
+    box-shadow: none;
+}
+
+calcite-chip-group {
+    align-self: center;
+}
+
+arcgis-feature-table {
+    height: 100%;
+}
+
+#map-container {
+    margin: 1rem;
+    width: calc(100% - 2rem);
+    border: 1px solid var(--calcite-color-border-2);
+    border-radius: 8px;
+    box-shadow: var(--calcite-shadow-md);
+}
+
+calcite-shell-panel[slot="panel-bottom"] {
+    margin-bottom: 1rem;
+}
+
+.esri-ui-corner .esri-component {
+    box-shadow: none;
+}
+
+.content-container {
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+    width: 100%;
+    background: #FAFCFA;
+}
+
+.content-container calcite-panel:not(.esri-feature-table__content) {
+    margin: 1rem;
+    height: calc(100% - 2rem);
+    width: calc(100% - 2rem);
+    border-radius: 8px;
+    box-shadow: var(--calcite-shadow-sm);
+}
+
+.content-start {
+    background: #FAFCFA;
+    height: 100%;
+    width: 65%;
+}
+
+.content-end {
+    background: #edf0ed;
+    height: 100%;
+    width: 35%;
+}
+
+/* Make calcite dialog content and editor fill available space */
+calcite-dialog>div {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    max-height: 800px;
+    min-height: 500px;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+calcite-tabs,
+calcite-tab {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    height: 100%;
+}
+
+calcite-tab {
+    padding: 0;
+}

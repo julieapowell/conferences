@@ -1,0 +1,88 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0" />
+  <title>ArcGIS Maps SDK for JavaScript CDN template</title>
+  <link rel="icon" href="data:;base64,=" />
+  <style>
+    html,
+    body {
+      background-color: var(--calcite-ui-foreground-2);
+      height: 100%;
+      margin: 0;
+    }
+
+    arcgis-chart {
+      width: 650px;
+      height: 450px;
+    }
+  </style>
+  <!-- Load the ArcGIS Maps SDK for JavaScript from the CDN -->
+  <script type="module" src="https://js.arcgis.com/5.0/"></script>
+  <script type="module" src="./app.js" defer></script>
+  <link rel="stylesheet" href="./style.css" />
+
+</head>
+
+<body class="mint-theme">
+  <calcite-shell content-behind>
+    <calcite-navigation slot="header" id="nav">
+      <calcite-navigation-logo href="#" thumbnail="./helo-other.png" alt="Application logo" slot="logo"
+        heading="NYC Helicopter Noise Complaints"></calcite-navigation-logo>
+    </calcite-navigation>
+
+    <arcgis-map id="map" item-id="5b3a9e652eb14b1892a083e4c2c064e4" popup-disabled>
+      <calcite-shell-panel slot="top-left" width="l">
+        <calcite-panel heading="How do helicopters affect New Yorkers?">
+          <calcite-accordion selection-mode="single">
+            <calcite-accordion-item heading="Neighborhood Info" icon-start="analysis" expanded id="censusAccordion">
+              <calcite-notice open>
+                <div slot="message">
+                  Click on a census block to view statistics.
+                </div>
+              </calcite-notice>
+              <arcgis-features visible open hide-close-button reference-element="map"></arcgis-features>
+            </calcite-accordion-item>
+            <calcite-accordion-item heading="Flights by Date" icon-start="scan-vertical">
+              <calcite-action slot="actions-end" icon="trash" id="clear-chart-filter"
+                style="display: none"></calcite-action>
+              <calcite-notice open width="full">
+                <div slot="message">
+                  Click on a date cell to filter flights.
+                </div>
+              </calcite-notice>
+              <calcite-block expanded>
+                <arcgis-chart id="cal-heat-chart"></arcgis-chart>
+              </calcite-block>
+            </calcite-accordion-item>
+            <calcite-accordion-item heading="Flight Table" icon-start="table">
+              <arcgis-feature-table reference-element="map"></arcgis-feature-table>
+            </calcite-accordion-item>
+          </calcite-accordion>
+        </calcite-panel>
+      </calcite-shell-panel>
+      <arcgis-expand slot="top-right">
+        <arcgis-bookmarks show-add-bookmark-button></arcgis-bookmarks>
+      </arcgis-expand>
+      <arcgis-basemap-toggle slot="bottom-left"></arcgis-basemap-toggle>
+    </arcgis-map>
+  </calcite-shell>
+</body>
+
+<script type="module">
+  const viewElement = document.querySelector("arcgis-map");
+  const calciteNavLogo = document.querySelector("calcite-navigation-logo");
+
+  await viewElement.viewOnReady();
+  const {
+    title,
+    description
+  } = viewElement.map.portalItem;
+  if (calciteNavLogo) {
+    calciteNavLogo.heading = title === "" ? "A web map" : title;
+  }
+</script>
+
+</html>
