@@ -36,8 +36,8 @@ toggleMapElem.addEventListener("click", function () {
   mapElem.style.display = "none";
   sceneElem.style.display = "block";
   liveSwitchElem3D.checked = liveSwitchElem2D.checked;
-  sceneElem.timeExtent = mapElem.timeExtent;
   timeSlider.referenceElement = sceneElem;
+  sceneElem.timeExtent = mapElem.timeExtent;
   console.log(sceneElem.map.layers);
 });
 

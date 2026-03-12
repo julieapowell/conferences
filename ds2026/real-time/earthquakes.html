@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>GeoJSONLayer | Sample | ArcGIS Maps SDK for JavaScript</title>
+
+    <!-- Load the ArcGIS Maps SDK for JavaScript from CDN -->
+    <script type="module" src="https://js.arcgis.com/5.0/"></script>
+
+    <style>
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <arcgis-map basemap="gray-vector" center="-150,30" zoom="2">
+        <arcgis-popup slot="popup"></arcgis-popup>
+        <arcgis-zoom slot="top-left"></arcgis-zoom>
+        <arcgis-scale-bar slot="bottom-left"></arcgis-scale-bar>
+    </arcgis-map>
+    <script type="module">
+        // Import layer class.
+        const GeoJSONLayer = await $arcgis.import("@arcgis/core/layers/GeoJSONLayer.js");
+        // Paste the url into a browser's address bar to download and view the attributes
+        // in the GeoJSON file. These attributes include:
+        // * mag - magnitude
+        // * type - earthquake or other event such as nuclear test
+        // * place - location of the event
+        // * time - the time of the event
+        // Use the Arcade Date() function to format time field into a human-readable format
+        const template = {
+            title: "Earthquake Info",
+            content: "Magnitude {mag} {type} hit {place} on {time}",
+            fieldInfos: [{
+                fieldName: "time",
+                format: {
+                    dateFormat: "short-date-short-time",
+                },
+            },],
+        };
+        const renderer = {
+            type: "simple",
+            field: "mag",
+            symbol: {
+                type: "simple-marker",
+                color: "orange",
+                outline: {
+                    color: "white",
+                },
+            },
+            visualVariables: [{
+                type: "size",
+                field: "mag",
+                stops: [{
+                    value: 2.5,
+                    size: "10px",
+                },
+                {
+                    value: 8,
+                    size: "40px",
+                },
+                ],
+            },],
+        };
+        // Point to the URL location, and set up layer properties.
+        const layer = new GeoJSONLayer({
+            url: "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_hour.geojson",
+            copyright: "USGS Earthquakes",
+            popupTemplate: template,
+            renderer: renderer,
+            orderBy: {
+                field: "mag",
+            },
+            refreshInterval: 1
+        });
+        // Get a reference to the Map component element.
+        const viewElement = document.querySelector("arcgis-map");
+        await viewElement.viewOnReady();
+        viewElement.map.add(layer);
+    </script>
+</body>
+
+</html>

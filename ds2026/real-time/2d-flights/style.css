@@ -1,0 +1,109 @@
+html,
+body {
+    margin: 0;
+    height: 100%;
+}
+
+body {
+    display: flex;
+    --calcite-color-brand: #00c291;
+    --calcite-color-brand-hover: #00ad82;
+    --calcite-color-brand-press: #00916d;
+    --calcite-color-background: #f2f7f4;
+    --calcite-color-foreground-1: #fafffd;
+    --calcite-color-foreground-2: #edf7f3;
+    --calcite-color-foreground-3: #e4ebe8;
+    --calcite-color-foreground-current: #c7ffda;
+    --calcite-color-info: #007f99;
+    --calcite-color-success: #47ac35;
+    --calcite-color-warning: #eeb417;
+    --calcite-color-danger: #d92024;
+    --calcite-color-danger-hover: #a91e20;
+    --calcite-color-danger-press: #7c1315;
+    --calcite-color-text-1: #222927;
+    --calcite-color-text-2: #333d3a;
+    --calcite-color-text-3: #3a4541;
+    --calcite-color-text-inverse: #fafffd;
+    --calcite-color-text-link: #04716c;
+    --calcite-color-border-1: #c3c7c5;
+    --calcite-color-border-2: #cdd4d0;
+    --calcite-color-border-3: #dfe8e3;
+    --calcite-color-border-input: #727d77;
+}
+
+body.calcite-mode-dark {
+    --calcite-color-brand: #00dea6;
+    --calcite-color-brand-hover: #00c997;
+    --calcite-color-brand-press: #00b386;
+    --calcite-color-background: #252927;
+    --calcite-color-foreground-1: #282f2c;
+    --calcite-color-foreground-2: #2f3633;
+    --calcite-color-foreground-3: #353b38;
+    --calcite-color-foreground-current: #588572;
+    --calcite-color-info: #38deff;
+    --calcite-color-success: #60fc44;
+    --calcite-color-warning: #ffca38;
+    --calcite-color-danger: #ff3639;
+    --calcite-color-danger-hover: #d93437;
+    --calcite-color-danger-press: #7c1d13;
+    --calcite-color-text-1: #f5fffc;
+    --calcite-color-text-2: #e6fcf6;
+    --calcite-color-text-3: #d6fff0;
+    --calcite-color-text-inverse: #1a1c1b;
+    --calcite-color-text-link: #15e8dd;
+    --calcite-color-border-1: #202422;
+    --calcite-color-border-2: #39473f;
+    --calcite-color-border-3: #2b3d33;
+    --calcite-color-border-input: rgb(80, 87, 83);
+}
+
+calcite-loader {
+    align-self: center;
+    justify-self: center;
+}
+
+calcite-panel calcite-icon {
+    align-self: center;
+    margin-inline: 0.75rem 0.25rem;
+}
+
+calcite-shell-panel {
+    --calcite-shell-panel-width: 340px;
+    --calcite-shell-panel-max-width: 90vw;
+}
+
+calcite-popover calcite-panel {
+    border-radius: 4px;
+}
+
+calcite-popover {
+    width: 316px;
+    padding-top: 0.25rem;
+}
+
+calcite-notice span[hidden] {
+    display: none;
+}
+
+calcite-notice calcite-button {
+    margin: 0.5rem;
+    align-self: center;
+    display: flex;
+}
+
+.scrim-container {
+    position: relative;
+}
+
+.esri-legend__service {
+    padding: 0;
+}
+
+.esri-legend__layer {
+    margin: 0;
+}
+
+.flex {
+    display: flex;
+    flex-direction: row;
+}

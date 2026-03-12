@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <title>Global flights</title>
+
+  <!-- Load the ArcGIS Maps SDK for JavaScript from the CDN -->
+  <script type="module" src="https://js.arcgis.com/5.0/"></script>
+  <script type="module" src="./app.js" defer></script>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+
+<body>
+  <calcite-loader></calcite-loader>
+  <calcite-shell content-behind hidden>
+    <calcite-navigation slot="header" id="nav">
+      <calcite-navigation-logo href="" icon="tour-pin-tear" alt="Application logo" slot="logo" heading="Global Flights"
+        description="Esri Dev & Tech Summit 2026"></calcite-navigation-logo>
+      <calcite-action-pad layout="horizontal" expand-disabled slot="content-end">
+        <calcite-action id="toggle-mode" text="Toggle mode" icon="brightness"></calcite-action>
+      </calcite-action-pad>
+
+      <calcite-tooltip placement="bottom" reference-element="toggle-mode" slot="content-end">Toggle
+        mode</calcite-tooltip>
+      <calcite-tooltip placement="bottom" reference-element="toggle-modal" close-on-click slot="content-end">About
+        this application</calcite-tooltip>
+    </calcite-navigation>
+    <calcite-shell-panel slot="panel-start" display-mode="float" width-scale="m">
+      <calcite-panel heading="Flights Feed" description="Stream layer configuration" id="main-panel">
+        <calcite-action id="toggle-instructions" text="Instructions" icon="app-gear"
+          slot="header-actions-end"></calcite-action>
+        <calcite-tooltip placement="bottom" reference-element="toggle-instructions" slot="header-actions-end">Configure
+          the service, and layer filtering</calcite-tooltip>
+        <calcite-popover reference-element="connection-invoke" id="connection-popover" pointer-disabled placement="top"
+          overlay-positioning="fixed" offset-distance="-32" offset-skidding="-16" auto-close>
+          <!-- <div id="layers-container"></div> -->
+          <calcite-panel heading="Manage connection" closable id="connection-panel">
+            <calcite-block open heading="Stream service">
+              <calcite-label>
+                Service URL:
+                <calcite-input read-only id="streamUrlText"
+                  value="https://utility.arcgis.com/usrsvcs/servers/bc342dd4db904215b3b70f09764f6654/rest/services/FlightAwarePosition/StreamServer">
+                </calcite-input>
+              </calcite-label>
+            </calcite-block>
+            <calcite-button width="full" slot="footer" id="toggleStreamLayerButton">Connect</calcite-button>
+          </calcite-panel>
+        </calcite-popover>
+        <div class="scrim-container">
+          <calcite-scrim hidden id="connection-scrim"></calcite-scrim>
+          <calcite-notice id="connection-notice" heading="Status" status="idle" summary="Not connected" icon="circle-f"
+            open width="full" kind="warning" scale="s">
+            <span slot="title" id="connection-notice-title">Not connected</span>
+            <calcite-button icon-start="plus" slot="actions-end" id="connection-invoke"></calcite-button>
+
+            <span slot="message" id="websocketRate" hidden></span>
+            <span slot="message" id="clientRate" hidden></span>
+          </calcite-notice>
+
+          <calcite-block heading="Spatial filter" description="Add a connection to adjust" icon-start="extent"
+            id="block-spatial">
+            <div class="flex">
+              <calcite-button id="drawSpatialFilter" icon-start="layer-filter" disabled width="half">
+                Draw extent
+              </calcite-button>
+              <calcite-button id="clearSpatialFilter" icon="circle" disabled kind="neutral" width="half">
+                Clear
+              </calcite-button>
+            </div>
+          </calcite-block>
+          <calcite-block heading="Attribute filter" description="Add a connection to adjust" icon-start="altitude"
+            id="block-attribute">
+            <calcite-action slot="header-actions-end" id="clearFilterButton" icon="blank" kind="neutral" disabled
+              text="Clear">
+            </calcite-action>
+            <calcite-tooltip reference-element="client-side-toggle">Calculate this on the client side - copy
+              text</calcite-tooltip>
+            <calcite-label disable-spacing layout="inline-space-between">Client-side filter<calcite-switch
+                id="clientside-switch" checked></calcite-switch>
+            </calcite-label>
+
+            <calcite-label for="attribute-filter-select">Filter planes by altitude
+              <calcite-select id="attribute-filter-select">
+                <calcite-option value="-1" selected>none</calcite-option>
+                <calcite-option value="10000">10,000ft or higher</calcite-option>
+                <calcite-option value="6000">6,000ft or higher</calcite-option>
+                <calcite-option value="3000">3,000ft or higher</calcite-option>
+                <calcite-option value="2999">Lower than 3,000 feet</calcite-option>
+              </calcite-select>
+            </calcite-label>
+          </calcite-block>
+          <calcite-block heading="Legend" icon-start="legend" id="block-legend" disabled>
+            <arcgis-legend reference-element="map" hidden></arcgis-legend>
+          </calcite-block>
+        </div>
+      </calcite-panel>
+    </calcite-shell-panel>
+    <arcgis-map padding="45" basemap="satellite" center="-117.98118, 34.00679" zoom="9" id="map"></arcgis-map>
+  </calcite-shell>
+
+
+</body>
+
+</html>
