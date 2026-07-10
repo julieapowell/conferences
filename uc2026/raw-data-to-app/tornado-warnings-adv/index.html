@@ -1,0 +1,103 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0" />
+  <title>ArcGIS Maps SDK for JavaScript CDN template</title>
+  <link rel="icon" href="data:;base64,=" />
+  <script type="module" src="https://js.arcgis.com/5.1/"></script>
+  <script type="module"
+    src="https://cdn.jsdelivr.net/npm/@esri/calcite-components/dist/calcite/calcite.esm.js"></script>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+
+<body>
+  <calcite-shell content-behind>
+    <calcite-navigation slot="header">
+      <calcite-action id="sheet-toggle" slot="logo" icon="hamburger" label="Open analysis"
+        class="mobile-only"></calcite-action>
+      <calcite-navigation-logo heading-level="1" slot="logo"></calcite-navigation-logo>
+      <calcite-chip-group selection-mode="single-persist" slot="content-end" style="padding-right: 0.6em;">
+        <calcite-chip icon="rain-thunder" value="max-warnings" id="max-warnings"></calcite-chip>
+        <calcite-chip value="All seasons" selected id="all-seasons">All seasons</calcite-chip>
+        <calcite-chip value="Winter" id="winter">Winter</calcite-chip>
+        <calcite-chip value="Spring" id="spring">Spring</calcite-chip>
+        <calcite-chip value="Summer" id="summer">Summer</calcite-chip>
+        <calcite-chip value="Fall" id="fall">Fall</calcite-chip>
+      </calcite-chip-group>
+    </calcite-navigation>
+
+    <calcite-tooltip reference-element="max-warnings" placement="bottom">
+      <span>Counties with warnings lasting longer than 2 months</span>
+    </calcite-tooltip>
+    <calcite-tooltip reference-element="all-seasons" placement="bottom">
+      <span>Warnings for the whole year</span>
+    </calcite-tooltip>
+    <calcite-tooltip reference-element="winter" placement="bottom">
+      <span>Winter warnings</span>
+    </calcite-tooltip>
+    <calcite-tooltip reference-element="spring" placement="bottom">
+      <span>Spring warnings</span>
+    </calcite-tooltip>
+    <calcite-tooltip reference-element="summer" placement="bottom">
+      <span>Summer warnings</span>
+    </calcite-tooltip>
+    <calcite-tooltip reference-element="fall" placement="bottom">
+      <span>Fall warnings</span>
+    </calcite-tooltip>
+
+    <calcite-shell-panel slot="panel-start" width="m" class="desktop-panel" display-mode="float" style="width: 100px">
+      <calcite-panel heading="Explore watches & warnings">
+        <calcite-flow id="analysis-flow">
+          <calcite-flow-item id="overview-flow-item" selected>
+            <div class="side-panel-content">
+              <calcite-block expanded collapsible heading="Legend">
+                <arcgis-legend reference-element="map"></arcgis-legend>
+              </calcite-block>
+              <arcgis-time-slider layout="auto" mode="time-window" reference-element="map"
+                id="time-slider-desktop"></arcgis-time-slider>
+            </div>
+          </calcite-flow-item>
+          <calcite-flow-item id="feature-flow-item" heading="Selected county"
+            description="Feature details appear here.">
+            <arcgis-features id="feature-details" open hide-close-button></arcgis-features>
+          </calcite-flow-item>
+        </calcite-flow>
+      </calcite-panel>
+    </calcite-shell-panel>
+
+    <arcgis-map item-id="7446554baec348a095f5e4d9fcf1f5c9" popup-disabled id="map">
+      <arcgis-zoom slot="top-right"></arcgis-zoom>
+      <arcgis-expand slot="top-right">
+        <arcgis-bookmarks></arcgis-bookmarks>
+      </arcgis-expand>
+
+
+    </arcgis-map>
+
+    <arcgis-time-slider layout="auto" mode="time-window" reference-element="map" class="mobile-slider"
+      id="time-slider-mobile"></arcgis-time-slider>
+
+    <calcite-sheet id="analysis-sheet" label="Analysis" dismissible class="mobile-only">
+      <calcite-panel heading="Explore watches & warnings">
+        <calcite-flow id="mobile-analysis-flow">
+          <calcite-flow-item id="mobile-overview-flow-item" selected>
+            <calcite-block expanded heading="Legend">
+              <arcgis-legend reference-element="map">
+              </arcgis-legend>
+            </calcite-block>
+          </calcite-flow-item>
+          <calcite-flow-item id="mobile-feature-flow-item" heading="Selected county"
+            description="Feature details appear here.">
+            <arcgis-features id="mobile-feature-details" open hide-close-button></arcgis-features>
+          </calcite-flow-item>
+        </calcite-flow>
+      </calcite-panel>
+    </calcite-sheet>
+  </calcite-shell>
+
+  <script type="module" src="./main.js"></script>
+</body>
+
+</html>

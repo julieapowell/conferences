@@ -1,0 +1,95 @@
+html,
+body {
+    height: 100%;
+    margin: 0;
+}
+
+calcite-flow {
+    min-height: 100%;
+}
+
+calcite-flow-item {
+    --calcite-flow-background-color: var(--calcite-ui-foreground-1);
+    --calcite-flow-border-color: var(--calcite-color-border-1);
+}
+
+calcite-chip {
+    --calcite-color-brand: #d81393;
+    --calcite-color-text-1: #d81393;
+}
+
+calcite-chip:nth-of-type(2) {
+    --calcite-color-brand: #d81393;
+    --calcite-color-text-1: #d81393;
+}
+
+calcite-chip:nth-of-type(3) {
+    --calcite-color-brand: #4f59e3;
+    --calcite-color-text-1: #4f59e3;
+}
+
+calcite-chip:nth-of-type(4) {
+    --calcite-color-brand: #1cc752;
+    --calcite-color-text-1: #1cc752;
+}
+
+calcite-chip:nth-of-type(5) {
+    --calcite-color-brand: #dbde3e;
+    --calcite-color-text-1: #dbde3e;
+}
+
+calcite-chip:nth-of-type(6) {
+    --calcite-color-brand: #917a6a;
+    --calcite-color-text-1: #917a6a;
+}
+
+.mobile-only {
+    display: none;
+}
+
+.mobile-slider {
+    display: none;
+}
+
+arcgis-time-slider {
+    width: 100%;
+    padding-left: 0px;
+    padding-right: 0px;
+}
+
+calcite-shell-panel {
+    --calcite-shell-panel-width: 390px;
+    /* initial */
+    --calcite-shell-panel-min-width: 390px;
+    /* min */
+}
+
+calcite-panel {
+    --calcite-panel-width: 390px;
+    /* initial */
+    --calcite-panel-min-width: 390px;
+    /* min */
+}
+
+@media (max-width: 900px) {
+    .mobile-only {
+        display: inline-flex;
+    }
+
+    .desktop-panel {
+        display: none;
+    }
+
+    .mobile-slider {
+        display: block;
+        position: absolute;
+        left: 0.3rem;
+        right: 0.3rem;
+        bottom: 0.5rem;
+        padding: 0.5rem 0.75rem;
+    }
+
+    calcite-chip-group {
+        display: none;
+    }
+}

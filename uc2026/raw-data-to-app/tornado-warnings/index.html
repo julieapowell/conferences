@@ -1,0 +1,63 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0" />
+  <title>ArcGIS Maps SDK for JavaScript CDN template</title>
+  <link rel="icon" href="data:;base64,=" />
+  <script type="module" src="https://js.arcgis.com/5.1/"></script>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+
+<body>
+
+  <calcite-shell content-behind>
+    <calcite-navigation slot="header">
+
+      <calcite-chip-group selection-mode="single-persist" slot="content-end" style="padding-right: 0.5em;">
+        <calcite-chip icon="rain-thunder" value="max-warnings" id="max-warnings"></calcite-chip>
+        <calcite-chip value="All seasons" selected id="all-seasons">All seasons</calcite-chip>
+        <calcite-chip value="Winter" id="winter">Winter</calcite-chip>
+        <calcite-chip value="Spring" id="spring">Spring</calcite-chip>
+        <calcite-chip value="Summer" id="summer">Summer</calcite-chip>
+        <calcite-chip value="Fall" id="fall">Fall</calcite-chip>
+      </calcite-chip-group>
+      <calcite-navigation-logo heading-level="1" slot="logo"></calcite-navigation-logo>
+    </calcite-navigation>
+    <calcite-tooltip reference-element="max-warnings" placement="bottom">
+      <span>Counties with warnings lasting longer than 2 months</span>
+    </calcite-tooltip>
+    <calcite-tooltip reference-element="all-seasons" placement="bottom">
+      <span>Warnings for the whole year</span>
+    </calcite-tooltip>
+    <calcite-tooltip reference-element="winter" placement="bottom">
+      <span>Winter warnings</span>
+    </calcite-tooltip>
+    <calcite-tooltip reference-element="spring" placement="bottom">
+      <span>Spring warnings</span>
+    </calcite-tooltip>
+    <calcite-tooltip reference-element="summer" placement="bottom">
+      <span>Summer warnings</span>
+    </calcite-tooltip>
+    <calcite-tooltip reference-element="fall" placement="bottom">
+      <span>Fall warnings</span>
+    </calcite-tooltip>
+
+    <calcite-panel>
+      <arcgis-map item-id="7446554baec348a095f5e4d9fcf1f5c9" popup-component-enabled id="map">
+        <arcgis-zoom slot="top-left"></arcgis-zoom>
+        <arcgis-search slot="top-right"></arcgis-search>
+        <arcgis-expand slot="top-left">
+          <arcgis-bookmarks></arcgis-bookmarks>
+        </arcgis-expand>
+        <arcgis-legend legend-style="card" card-style-layout="stack" slot="bottom-left"></arcgis-legend>
+      </arcgis-map>
+      <arcgis-time-slider layout="auto" mode="time-window" reference-element="map"></arcgis-time-slider>
+    </calcite-panel>
+
+  </calcite-shell>
+  <script type="module" src="./main.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,37 @@
+    html,
+    body {
+        background-color: var(--calcite-ui-foreground-2);
+        height: 100%;
+        margin: 0;
+    }
+
+    calcite-chip:first-of-type {
+        --calcite-color-brand: #151414;
+        --calcite-color-text-1: #151414;
+    }
+
+    calcite-chip:nth-of-type(2) {
+        --calcite-color-brand: #d81393;
+        --calcite-color-text-1: #d81393;
+    }
+
+    calcite-chip:nth-of-type(3) {
+        --calcite-color-brand: #4f59e3;
+        --calcite-color-text-1: #4f59e3;
+    }
+
+    calcite-chip:nth-of-type(4) {
+        --calcite-color-brand: #1cc752;
+        --calcite-color-text-1: #1cc752;
+    }
+
+    /* dbde3e */
+    calcite-chip:nth-of-type(5) {
+        --calcite-color-brand: #dbde3e;
+        --calcite-color-text-1: #dbde3e;
+    }
+
+    calcite-chip:nth-of-type(6) {
+        --calcite-color-brand: #917a6a;
+        --calcite-color-text-1: #917a6a;
+    }
