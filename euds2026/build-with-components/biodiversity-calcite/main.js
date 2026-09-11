@@ -1,14 +1,9 @@
 const mapElement = document.querySelector("arcgis-map");
 const chartElement = document.querySelector("arcgis-chart");
-const panelBottom = document.getElementById("panel-bottom");
 const statusChip = document.getElementById("status-chip");
 let statusChipLabel = statusChip ? statusChip.textContent.trim() : "";
 const statusTooltip = document.getElementById("status-tooltip");
-const sheetToggleEl = document.getElementById("sheet-toggle");
-const sheetEl = document.getElementById("sheet");
 const sharedTabs = document.getElementById("shared-tabs");
-const tabTitleEls = sharedTabs.querySelectorAll("calcite-tab-title");
-const listItemEls = document.querySelectorAll("#sheet calcite-list-item");
 
 const shellPanelBottom = document.getElementById("shell-panel-bottom");
 const dialogEl = document.getElementById("dialog");
@@ -22,6 +17,9 @@ const saveAlertLink = document.getElementById("save-alert-link");
 const saveErrorAlert = document.getElementById("save-error-alert");
 const saveErrorMessage = document.getElementById("save-error-message");
 const galleryAction = document.getElementById("gallery-action");
+const selectedAttributeChip = document.getElementById("selected-attribute-chip");
+const popupElement = document.getElementById("popup");
+const similarFeaturesAction = document.getElementById("similar-features-action");
 
 const PORTAL_URL = "https://jsapi.maps.arcgis.com/";
 const SAVE_GROUP_TITLE = "Global Biodiversity and Conservation Maps";
@@ -37,7 +35,6 @@ const BREAKPOINT_SMALL = 800;
 
 // Wire the UI before any awaits so docking never waits on map or chart loading.
 init();
-
 
 //////////////////////////////////////////////////////
 //  Map config
@@ -60,29 +57,20 @@ const biodiversityLayer = mapElement.map?.allLayers.find((layer) => {
 await biodiversityLayer.load();
 
 //////////////////////////////////////////////////////
-//  Chart setup
-//////////////////////////////////////////////////////
-
-const [{ createModel }] = await $arcgis.import(["@arcgis/charts-components"]);
-
-chartElement.model = await createModel({
-    layer: biodiversityLayer,
-    config: biodiversityLayer.charts[0]
-});
-
-chartElement.model.hideEmptyRowsAndColumns = true;
-chartElement.view = view;
-chartElement.layer = biodiversityLayer;
-
-//////////////////////////////////////////////////////
 //  Smart mapping and field picker logic
 //////////////////////////////////////////////////////
 
 const sizeValuePicker = document.getElementById("size-attribute-picker");
 const sizeThemeSelector = document.getElementById("size-theme-selector");
+const symbolStyleBlock = document.getElementById("symbol-style-block");
+const symbolStyleSelector = document.getElementById("symbol-style-selector");
+const featureTable = document.querySelector("arcgis-feature-table");
+
+const GRID_ID_FIELD = "Grid_ID";
 
 let numericalFields = [];
 let selectedSizeField = null;
+const statisticsByField = new Map();
 
 function extractNumericalFields() {
     numericalFields = [];
@@ -131,6 +119,39 @@ async function populateAttributeLists() {
     });
 }
 
+function updateSelectedAttributeChip(field) {
+    if (selectedAttributeChip && field) {
+        selectedAttributeChip.textContent = field.alias;
+    }
+}
+
+async function updateFeatureTable(field) {
+    if (!featureTable || !field) {
+        return;
+    }
+
+    const [TableTemplate, FieldColumnTemplate] = await $arcgis.import([
+        "@arcgis/core/widgets/FeatureTable/support/TableTemplate.js",
+        "@arcgis/core/widgets/FeatureTable/support/FieldColumnTemplate.js"
+    ]);
+
+    featureTable.tableTemplate = new TableTemplate({
+        columnTemplates: [
+            new FieldColumnTemplate({
+                fieldName: GRID_ID_FIELD,
+                label: "Grid ID"
+            }),
+            new FieldColumnTemplate({
+                fieldName: field.name,
+                label: field.alias,
+                initialSortPriority: 0,
+                direction: "desc"
+            })
+        ]
+    });
+    featureTable.tableTitle = field.alias;
+}
+
 function initializeFromExistingRenderer() {
     const renderer = biodiversityLayer?.renderer;
     const sizeVariable = renderer?.visualVariables?.find((visualVariable) => visualVariable.type === "size");
@@ -142,10 +163,12 @@ function initializeFromExistingRenderer() {
 
     if (sizeThemeSelector) {
         sizeThemeSelector.value = themeFromRenderer;
+        updateSymbolStyleVisibility();
     }
 
     if (initialField && sizeValuePicker) {
         selectedSizeField = initialField;
+        updateSelectedAttributeChip(initialField);
         sizeValuePicker.currentValue = {
             value: initialField.name,
             label: initialField.alias
@@ -170,23 +193,46 @@ function wireUpEvents() {
                 return;
             }
 
+            updateSelectedAttributeChip(field);
+
             if (selectedSizeField && selected.value === selectedSizeField.name) {
                 return;
             }
 
             selectedSizeField = field;
-            await applyMapping();
+            await Promise.all([
+                applyMapping(),
+                updateFeatureTable(field)
+            ]);
         });
     }
 
     if (sizeThemeSelector) {
         sizeThemeSelector.addEventListener("calciteSegmentedControlChange", async () => {
+            updateSymbolStyleVisibility();
+
             if (!selectedSizeField) {
                 return;
             }
 
             await applyMapping();
         });
+    }
+
+    if (symbolStyleSelector) {
+        symbolStyleSelector.addEventListener("calciteComboboxChange", async () => {
+            if (sizeThemeSelector?.value !== "above-and-below" || !selectedSizeField) {
+                return;
+            }
+
+            await applyMapping();
+        });
+    }
+}
+
+function updateSymbolStyleVisibility() {
+    if (symbolStyleBlock) {
+        symbolStyleBlock.hidden = sizeThemeSelector?.value !== "above-and-below";
     }
 }
 
@@ -195,55 +241,110 @@ async function applyMapping() {
         return;
     }
 
-    const [sizeRendererCreator, colorRendererCreator] = await $arcgis.import([
-        "@arcgis/core/smartMapping/renderers/size.js",
-        "@arcgis/core/smartMapping/renderers/color.js"
+    const [univariateColorSizeRendererCreator] = await $arcgis.import([
+        "@arcgis/core/smartMapping/renderers/univariateColorSize.js"
     ]);
 
     const sizeTheme = sizeThemeSelector?.value || "above";
+    const symbolStyle = sizeTheme === "above-and-below"
+        ? symbolStyleSelector?.value || "arrow"
+        : "circle";
 
-    const sizeParams = {
+    const params = {
         layer: biodiversityLayer,
         view: mapElement.view,
         field: selectedSizeField.name,
         theme: sizeTheme,
         symbolOptions: {
-            symbolStyle: "circle"
+            symbolStyle
         }
     };
 
-    const sizeResult = await sizeRendererCreator.createContinuousRenderer(sizeParams);
-    const renderer = sizeResult.renderer;
-
-    const colorParams = {
-        layer: biodiversityLayer,
-        view: mapElement.view,
-        field: selectedSizeField.name,
-        theme: sizeTheme,
-        symbolOptions: {
-            symbolStyle: "circle"
-        }
-    };
-
-    const colorResult = await colorRendererCreator.createContinuousRenderer(colorParams);
-    const colorRenderer = colorResult.renderer;
-
-    if (renderer?.defaultSymbol && colorRenderer?.defaultSymbol) {
-        renderer.defaultSymbol = colorRenderer.defaultSymbol.clone();
-    }
-
-    if (colorRenderer?.visualVariables?.length) {
-        const existingSizeVisualVariables = renderer?.visualVariables?.filter((visualVariable) => visualVariable.type !== "color") ?? [];
-        renderer.visualVariables = [...existingSizeVisualVariables, ...colorRenderer.visualVariables];
-    }
+    const { renderer } = await univariateColorSizeRendererCreator.createContinuousRenderer(params);
 
     biodiversityLayer.renderer = renderer;
+}
+
+async function clearSimilarFeatures() {
+    const layerView = await view.whenLayerView(biodiversityLayer);
+    await layerView.when();
+    layerView.featureEffect = null;
+}
+
+async function highlightSimilarFeatures() {
+    if (similarFeaturesAction.loading || !selectedSizeField) {
+        return;
+    }
+
+    const field = selectedSizeField;
+    const attributeValue = Number(popupElement.selectedFeature?.attributes?.[field.name]);
+    if (!Number.isFinite(attributeValue)) {
+        return;
+    }
+
+    similarFeaturesAction.loading = true;
+
+    try {
+        const [reactiveUtils, FeatureEffect] = await $arcgis.import([
+            "@arcgis/core/core/reactiveUtils.js",
+            "@arcgis/core/layers/support/FeatureEffect.js"
+        ]);
+        const layerView = await view.whenLayerView(biodiversityLayer);
+        await layerView.when();
+        await reactiveUtils.whenOnce(() => !layerView.updating);
+
+        let statistics = statisticsByField.get(field.name);
+        if (!statistics) {
+            const [univariateColorSizeRendererCreator] = await $arcgis.import([
+                "@arcgis/core/smartMapping/renderers/univariateColorSize.js"
+            ]);
+            const result = await univariateColorSizeRendererCreator.createContinuousRenderer({
+                layer: biodiversityLayer,
+                view,
+                field: field.name,
+                theme: sizeThemeSelector?.value || "above"
+            });
+            statistics = result.statistics;
+            statisticsByField.set(field.name, statistics);
+        }
+        const val = statistics?.stddev / 4;
+
+        if (!Number.isFinite(val) || !popupElement.open) {
+            return;
+        }
+
+        layerView.featureEffect = new FeatureEffect({
+            filter: {
+                where: `${field.name} BETWEEN ${attributeValue - val} AND ${attributeValue + val}`
+            },
+            includedEffect: "brightness(130%) saturate(150%)",
+            excludedEffect: "grayscale(100%) opacity(25%)"
+        });
+    } finally {
+        similarFeaturesAction.loading = false;
+    }
 }
 
 extractNumericalFields();
 await populateAttributeLists();
 initializeFromExistingRenderer();
+await updateFeatureTable(selectedSizeField);
 wireUpEvents();
+
+//////////////////////////////////////////////////////
+//  Chart setup
+//////////////////////////////////////////////////////
+
+const [{ createModel }] = await $arcgis.import(["@arcgis/charts-components"]);
+
+chartElement.model = await createModel({
+    layer: biodiversityLayer,
+    config: biodiversityLayer.charts[0]
+});
+
+chartElement.model.hideEmptyRowsAndColumns = true;
+chartElement.view = view;
+chartElement.layer = biodiversityLayer;
 
 //////////////////////////////////////////////////////
 //  Save the web map
@@ -310,10 +411,12 @@ async function handleSaveClick() {
 
     try {
         const savedItem = await saveWebMap();
-        statusChip.icon = "check-circle-f";
-        statusChip.classList.remove("warning-chip");
-        statusChipLabel = "Saved";
-        statusChip.textContent = statusChipLabel;
+        if (statusChip) {
+            statusChip.icon = "check-circle-f";
+            statusChip.classList.remove("warning-chip");
+            statusChipLabel = "Saved";
+            statusChip.textContent = statusChipLabel;
+        }
 
         saveAlertLink.href = savedItem.itemPageUrl;
         saveAlertLink.textContent = savedItem.title;
@@ -332,17 +435,17 @@ async function handleSaveClick() {
 //////////////////////////////////////////////////////
 
 function init() {
-    sheetToggleEl.addEventListener("click", () => handleSheetOpen());
-
-    listItemEls.forEach((el) => {
-        el.addEventListener("calciteListItemSelect", (event) => handleListSelect(event));
-    });
-
-    sharedTabs.addEventListener("calciteTabsActivate", () => handleTabSelect());
-
     saveAction.addEventListener("click", () => handleSaveClick());
 
     galleryAction.addEventListener("click", () => window.open(GALLERY_URL, "_blank", "noopener"));
+
+    similarFeaturesAction.addEventListener("click", () => highlightSimilarFeatures());
+
+    popupElement.addEventListener("arcgisPropertyChange", (event) => {
+        if (event.detail?.name === "open" && !popupElement.open) {
+            clearSimilarFeatures();
+        }
+    });
 
     if (popOutAction && dockAction && shellPanelBottom && dialogEl) {
         popOutAction.addEventListener("click", () => {
@@ -371,41 +474,6 @@ function init() {
 
     window.addEventListener("resize", handleResponsiveLayout);
     handleResponsiveLayout();
-}
-
-function handleSheetOpen() {
-    sheetEl.open = true;
-    panelBottom.collapsed = false;
-}
-
-function handleListSelect(event) {
-    const selectedItem = event.target;
-    const value = selectedItem.getAttribute("value");
-    if (!value) {
-        return;
-    }
-    sheetEl.open = false;
-
-    listItemEls.forEach((item) => {
-        item.selected = item === selectedItem;
-    });
-
-    tabTitleEls.forEach((tabTitle) => {
-        tabTitle.selected = tabTitle.getAttribute("value") === value;
-    });
-}
-
-function handleTabSelect() {
-    const selectedTitle = sharedTabs.querySelector("calcite-tab-title[selected]");
-    const value = selectedTitle ? selectedTitle.getAttribute("value") : null;
-    if (!value) {
-        return;
-    }
-    sheetEl.open = false;
-
-    listItemEls.forEach((item) => {
-        item.selected = item.getAttribute("value") === value;
-    });
 }
 
 function handleResponsiveLayout() {

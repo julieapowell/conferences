@@ -1,3 +1,4 @@
+<!doctype html>
 <html>
 
 <head>
@@ -20,6 +21,9 @@
             <calcite-navigation-logo icon="footprint" heading="Biodiversity and Conservation" alt="Application logo"
                 slot="logo">
             </calcite-navigation-logo>
+            <calcite-chip kind="brand" slot="content-start" id="selected-attribute-chip" label="selected attribute">
+                Threatened Species Richness Mean
+            </calcite-chip>
             <calcite-navigation-user slot="user"></calcite-navigation-user>
             <calcite-action slot="content-end" icon="save" scale="l" text="Save new webmap" id="save"></calcite-action>
         </calcite-navigation>
@@ -29,52 +33,16 @@
             <arcgis-expand slot="top-left">
                 <arcgis-bookmarks></arcgis-bookmarks>
             </arcgis-expand>
-            <arcgis-expand slot="bottom-left" expanded>
-                <arcgis-legend>
-                </arcgis-legend></arcgis-expand>
             <arcgis-search slot="top-right"></arcgis-search>
-            <arcgis-popup slot="popup"></arcgis-popup>
+            <arcgis-popup id="popup" slot="popup">
+                <calcite-action id="similar-features-action" slot="actions-start" icon="filter"
+                    text="Highlight similar values"></calcite-action>
+            </arcgis-popup>
         </arcgis-map>
         <calcite-shell-panel slot="panel-end" id="shell-panel-bottom" resizable hidden>
             <calcite-panel id="panel-bottom" heading="Data Explorer">
-                <calcite-chip class="warning-chip" id="status-chip" slot="header-actions-end"
-                    icon="exclamation-mark-triangle-f">
-                    Unsaved changes
-                </calcite-chip>
-                <calcite-tooltip label="Unsaved changes" id="status-tooltip" hidden>
-                    Unsaved changes
-                </calcite-tooltip>
-                <calcite-action indicator icon="list-bullet" text="projects" slot="header-actions-end"
-                    id="sheet-toggle">
-                </calcite-action>
                 <calcite-action icon="minimize" text="Pop out" slot="header-actions-end" id="pop-out"></calcite-action>
                 <calcite-shell class="panel-shell" id="panel-tabs-host">
-                    <calcite-sheet id="sheet" display-mode="float" width-scale="m" slot="sheets" position="inline-end">
-                        <calcite-panel heading="5 active projects">
-                            <calcite-list selection-mode="single-persist" selection-appearance="border">
-                                <calcite-list-item label="Field Chart" value="field-chart" selected>
-                                    <calcite-chip scale="s" icon="link-chart" slot="content-end"></calcite-chip>
-                                </calcite-list-item>
-                                <calcite-list-item label="WIP_v2_test" value="wip-v2-test">
-                                    <calcite-chip scale="s" icon="exclamation-mark-triangle-f" class="warning-chip"
-                                        slot="content-end"></calcite-chip>
-                                    <calcite-chip scale="s" icon="analysis" slot="content-end"></calcite-chip>
-                                </calcite-list-item>
-                                <calcite-list-item label="Presentation_1" value="presentation-1">
-                                    <calcite-chip scale="s" icon="graph-bar" slot="content-end"></calcite-chip>
-                                </calcite-list-item>
-                                <calcite-list-item label="Presentation_2" value="presentation-2">
-                                    <calcite-chip scale="s" icon="exclamation-mark-triangle-f" class="warning-chip"
-                                        slot="content-end"></calcite-chip>
-                                    <calcite-chip scale="s" icon="pie-chart" slot="content-end"></calcite-chip>
-                                </calcite-list-item>
-                                <calcite-list-item label="River and estuary area report"
-                                    value="river-estuary-area-report">
-                                    <calcite-chip scale="s" icon="link-chart" slot="content-end"></calcite-chip>
-                                </calcite-list-item>
-                            </calcite-list>
-                        </calcite-panel>
-                    </calcite-sheet>
                 </calcite-shell>
             </calcite-panel>
         </calcite-shell-panel>
@@ -87,21 +55,11 @@
                         <calcite-tab-title icon-start="link-chart" selected value="field-chart">
                             Map configuration
                         </calcite-tab-title>
-                        <calcite-tab-title value="wip-v2-test">
-                            Hex grid table
-                            <calcite-chip scale="s" icon="table" class="warning-chip">
-                            </calcite-chip>
+                        <calcite-tab-title value="table" icon-start="table">
+                            Table
                         </calcite-tab-title>
-                        <calcite-tab-title icon-start="graph-bar" value="presentation-1">
-                            Compare
-                        </calcite-tab-title>
-                        <calcite-tab-title icon-start="pie-chart" value="presentation-2">
-                            Presentation_2
-                            <calcite-chip scale="s" icon="exclamation-mark-triangle-f" class="warning-chip">
-                            </calcite-chip>
-                        </calcite-tab-title>
-                        <calcite-tab-title icon-start="link-chart" value="river-estuary-area-report">
-                            River and estuary area report
+                        <calcite-tab-title icon-start="graph-bar" value="chart">
+                            Scatter plot
                         </calcite-tab-title>
                     </calcite-tab-nav>
                     <calcite-tab selected>
@@ -124,7 +82,29 @@
                                     value="above-and-below">Above/Below</calcite-segmented-control-item>
                             </calcite-segmented-control>
                         </calcite-block>
-
+                        <calcite-block id="symbol-style-block" expanded heading="Symbol style" hidden>
+                            <calcite-combobox id="symbol-style-selector" label="Symbol style"
+                                selection-mode="single-persist" selection-display="single" clear-disabled>
+                                <calcite-combobox-item value="caret" heading="Caret"></calcite-combobox-item>
+                                <calcite-combobox-item value="circle-caret"
+                                    heading="Circle caret"></calcite-combobox-item>
+                                <calcite-combobox-item value="arrow" heading="Arrow" selected></calcite-combobox-item>
+                                <calcite-combobox-item value="circle-arrow"
+                                    heading="Circle arrow"></calcite-combobox-item>
+                                <calcite-combobox-item value="plus-minus" heading="Plus/minus"></calcite-combobox-item>
+                                <calcite-combobox-item value="circle-plus-minus"
+                                    heading="Circle plus/minus"></calcite-combobox-item>
+                                <calcite-combobox-item value="square" heading="Square"></calcite-combobox-item>
+                                <calcite-combobox-item value="circle" heading="Circle"></calcite-combobox-item>
+                                <calcite-combobox-item value="triangle" heading="Triangle"></calcite-combobox-item>
+                                <calcite-combobox-item value="happy-sad" heading="Happy/sad"></calcite-combobox-item>
+                                <calcite-combobox-item value="thumb" heading="Thumb"></calcite-combobox-item>
+                            </calcite-combobox>
+                        </calcite-block>
+                        <calcite-block expanded>
+                            <arcgis-legend reference-element="map">
+                            </arcgis-legend>
+                        </calcite-block>
                     </calcite-tab>
                     <calcite-tab>
                         <arcgis-feature-table reference-element="map" map-layer-id="1a06d698622-layer-5"
@@ -134,16 +114,6 @@
                         <arcgis-chart sync-view-selection>
                             <arcgis-charts-action-bar slot="action-bar"></arcgis-charts-action-bar>
                         </arcgis-chart>
-                    </calcite-tab>
-                    <calcite-tab>
-                        <calcite-notice open kind=" warning">
-                            <span slot="message">This entity has some kind of problem</span>
-                        </calcite-notice>
-                    </calcite-tab>
-                    <calcite-tab>
-                        <calcite-notice open>
-                            <span slot="message">Unique entity content</span>
-                        </calcite-notice>
                     </calcite-tab>
                 </calcite-tabs>
             </calcite-shell>
@@ -166,7 +136,7 @@
     </calcite-shell>
 
     <!-- Application Script -->
-    <script type="module" src="main.js"></script>
+    <script type="module" src="main.js?v=lazy-statistics-popup-close"></script>
 </body>
 
 </html>
