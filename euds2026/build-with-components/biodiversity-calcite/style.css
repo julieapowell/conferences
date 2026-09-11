@@ -1,0 +1,95 @@
+.warning-chip {
+    --calcite-icon-color: var(--calcite-color-status-warning);
+}
+
+calcite-tab-title calcite-chip {
+    margin-inline-start: 0.5rem;
+}
+
+calcite-action[slot="header-actions-end"] {
+    --calcite-action-indicator-color: var(--calcite-color-status-warning);
+}
+
+.panel-shell {
+    position: relative;
+    background-size: 16px 16px;
+    background-color: var(--calcite-color-background);
+    background-image: radial-gradient(circle,
+            var(--calcite-color-border-3) 1px,
+            transparent 1px);
+    min-height: 40vh;
+}
+
+calcite-list-item calcite-chip {
+    margin-inline-end: 0.5rem;
+}
+
+calcite-list-item:last-of-type {
+    border-block-end: 1px solid var(--calcite-color-border-3);
+}
+
+calcite-tab-nav {
+    margin: 0 0.5rem;
+}
+
+calcite-notice {
+    margin: 1rem;
+}
+
+#status-chip {
+    margin: 0 0.5rem;
+    align-self: center;
+}
+
+calcite-tab-title[selected] {
+    --calcite-icon-color: var(--calcite-color-brand);
+}
+
+calcite-sheet {
+    --calcite-sheet-scrim-background: rgba(248, 248, 248, 0.7);
+}
+
+calcite-sheet calcite-panel {
+    width: 100% !important;
+    --calcite-color-background: var(--calcite-color-foreground-1);
+}
+
+calcite-tabs {
+    --calcite-tab-content-block-padding: 0;
+}
+
+.panel-shell calcite-tabs {
+    inline-size: 100%;
+    min-inline-size: 0;
+}
+
+calcite-tab {
+    width: 100%;
+    height: 100%;
+}
+
+calcite-dialog {
+    --calcite-dialog-content-space: 0;
+}
+
+#shell-panel-bottom[resizable] {
+    --calcite-shell-panel-min-width: 22rem;
+    --calcite-shell-panel-max-width: 60vw;
+    --calcite-shell-panel-width: 34rem;
+}
+
+arcgis-feature-table {
+    width: 100%;
+    height: 500px;
+}
+
+arcgis-chart {
+    width: 100%;
+    height: 500px;
+}
+
+/* Field selector styling */
+.field-selector-wrapper {
+    position: relative;
+    margin-bottom: var(--calcite-spacing-lg);
+}
