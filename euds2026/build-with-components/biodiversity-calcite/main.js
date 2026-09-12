@@ -265,6 +265,17 @@ async function applyMapping() {
     biodiversityLayer.renderer = renderer;
 }
 
+
+extractNumericalFields();
+await populateAttributeLists();
+initializeFromExistingRenderer();
+await updateFeatureTable(selectedSizeField);
+wireUpEvents();
+
+////////////////////////////////////////////////////////////////////////////////////////////
+//  Find hexagons within 1/4 standard deviation of the selected feature's attribute value
+////////////////////////////////////////////////////////////////////////////////////////////
+
 async function clearSimilarFeatures() {
     const layerView = await view.whenLayerView(biodiversityLayer);
     await layerView.when();
@@ -324,12 +335,6 @@ async function highlightSimilarFeatures() {
         similarFeaturesAction.loading = false;
     }
 }
-
-extractNumericalFields();
-await populateAttributeLists();
-initializeFromExistingRenderer();
-await updateFeatureTable(selectedSizeField);
-wireUpEvents();
 
 //////////////////////////////////////////////////////
 //  Chart setup
