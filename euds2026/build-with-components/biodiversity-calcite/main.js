@@ -265,7 +265,6 @@ async function applyMapping() {
     biodiversityLayer.renderer = renderer;
 }
 
-
 extractNumericalFields();
 await populateAttributeLists();
 initializeFromExistingRenderer();
@@ -367,8 +366,7 @@ async function findSaveGroup(portal) {
 async function saveWebMap() {
     const [Portal] = await $arcgis.import(["@arcgis/core/portal/Portal.js"]);
 
-    const portal = new Portal({ url: PORTAL_URL });
-    await portal.signIn();
+    const portal = Portal.getDefault();
 
     const attributeName = selectedSizeField?.alias ?? selectedSizeField?.name ?? "";
     const webmap = mapElement.map;
@@ -391,7 +389,11 @@ async function saveWebMap() {
     }
 
     try {
-        const group = await findSaveGroup(portal);
+        await portal.request(`${savedItem.userItemUrl}/share`, {
+            method: "post",
+            query: { groups: "4f7c73a26a58490a906dca4fe7a280c3" }
+        });
+        /*const group = await findSaveGroup(portal);
         if (group) {
             await portal.request(`${savedItem.userItemUrl}/share`, {
                 method: "post",
@@ -399,7 +401,7 @@ async function saveWebMap() {
             });
         } else {
             console.warn(`Group "${SAVE_GROUP_TITLE}" was not found, the item was not shared`);
-        }
+        }*/
     } catch (error) {
         console.warn("Unable to share the web map with the group", error);
     }

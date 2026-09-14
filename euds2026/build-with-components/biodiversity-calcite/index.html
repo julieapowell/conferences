@@ -8,10 +8,21 @@
 
     <!-- Application Styles -->
     <link rel="stylesheet" href="style.css" />
-    <script>
-        globalThis.esriConfig = {
+    <script type="module">
+        const [config, idMgr, OAuthInfo] = await $arcgis.import([
+            "@arcgis/core/config.js",
+            "@arcgis/core/identity/IdentityManager.js",
+            "@arcgis/core/identity/OAuthInfo.js",
+        ]);
+
+        /* globalThis.esriConfig = {
             portalUrl: "https://jsapi.maps.arcgis.com/"
-        }
+        } */
+        const oAuthInfo = new OAuthInfo({
+            appId: "No2Lhym7wqkgUyOG",
+            //portalUrl: config.portalUrl
+        });
+        idMgr.registerOAuthInfos([oAuthInfo]); 
     </script>
 </head>
 
