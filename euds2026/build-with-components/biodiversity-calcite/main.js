@@ -21,9 +21,8 @@ const selectedAttributeChip = document.getElementById("selected-attribute-chip")
 const popupElement = document.getElementById("popup");
 const similarFeaturesAction = document.getElementById("similar-features-action");
 
-const PORTAL_URL = "https://jsapi.maps.arcgis.com/";
 const SAVE_GROUP_TITLE = "Global Biodiversity and Conservation Maps";
-const GALLERY_URL = "https://jsapi.maps.arcgis.com/apps/instant/gallery/index.html?appid=053eb0c7ab7345fca7bd43f94e4b9274&sortField=modified&sortOrder=desc&view=grid";
+const GALLERY_PATH = "/apps/instant/gallery/index.html?appid=053eb0c7ab7345fca7bd43f94e4b9274&sortField=modified&sortOrder=desc&view=grid";
 
 function moveTabsTo(host) {
     if (host && sharedTabs.parentElement !== host) {
@@ -354,15 +353,6 @@ chartElement.layer = biodiversityLayer;
 //  Save the web map
 //////////////////////////////////////////////////////
 
-async function findSaveGroup(portal) {
-    const { results } = await portal.queryGroups({
-        query: `title:"${SAVE_GROUP_TITLE}"`,
-        num: 20
-    });
-
-    return results.find((group) => group.title === SAVE_GROUP_TITLE) ?? null;
-}
-
 async function saveWebMap() {
     const [Portal] = await $arcgis.import(["@arcgis/core/portal/Portal.js"]);
 
@@ -393,15 +383,6 @@ async function saveWebMap() {
             method: "post",
             query: { groups: "4f7c73a26a58490a906dca4fe7a280c3" }
         });
-        /*const group = await findSaveGroup(portal);
-        if (group) {
-            await portal.request(`${savedItem.userItemUrl}/share`, {
-                method: "post",
-                query: { groups: group.id }
-            });
-        } else {
-            console.warn(`Group "${SAVE_GROUP_TITLE}" was not found, the item was not shared`);
-        }*/
     } catch (error) {
         console.warn("Unable to share the web map with the group", error);
     }
@@ -441,10 +422,26 @@ async function handleSaveClick() {
 //  Init UI
 //////////////////////////////////////////////////////
 
+async function buildGalleryUrl() {
+    const [Portal] = await $arcgis.import(["@arcgis/core/portal/Portal.js"]);
+
+    const portal = Portal.getDefault();
+    await portal.load();
+
+    // Org-specific portals expose a urlKey subdomain (e.g. "myorg"); the default
+    // anonymous portal does not, so fall back to customBaseUrl alone.
+    const host = portal.urlKey ? `${portal.urlKey}.${portal.customBaseUrl}` : portal.customBaseUrl;
+
+    return `https://${host}${GALLERY_PATH}`;
+}
+
 function init() {
     saveAction.addEventListener("click", () => handleSaveClick());
 
-    galleryAction.addEventListener("click", () => window.open(GALLERY_URL, "_blank", "noopener"));
+    galleryAction.addEventListener("click", async () => {
+        const galleryUrl = await buildGalleryUrl();
+        window.open(galleryUrl, "_blank", "noopener");
+    });
 
     similarFeaturesAction.addEventListener("click", () => highlightSimilarFeatures());
 
