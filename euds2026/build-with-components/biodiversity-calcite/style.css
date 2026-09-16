@@ -82,12 +82,16 @@ calcite-dialog {
 
 arcgis-feature-table {
     width: 100%;
-    height: 440px;
+    height: 650px;
 }
 
 arcgis-chart {
     width: 100%;
-    height: 440px;
+    height: 650px;
+}
+
+#similar-features-action {
+    --calcite-icon-color: var(--calcite-color-status-warning);
 }
 
 /* Field selector styling */

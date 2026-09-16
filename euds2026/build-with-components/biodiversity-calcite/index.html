@@ -45,9 +45,9 @@
                 <arcgis-bookmarks></arcgis-bookmarks>
             </arcgis-expand>
             <arcgis-search slot="top-right"></arcgis-search>
-            <arcgis-popup id="popup" slot="popup">
-                <calcite-action id="similar-features-action" slot="actions-start" icon="filter"
-                    text="Highlight similar values"></calcite-action>
+            <arcgis-popup id="popup" slot="popup" include-default-actions-disabled>
+                <calcite-action id="similar-features-action" slot="actions-start" icon="filter" text="Show similar"
+                    text-enabled></calcite-action>
             </arcgis-popup>
         </arcgis-map>
         <calcite-shell-panel slot="panel-end" id="shell-panel-bottom" resizable hidden>

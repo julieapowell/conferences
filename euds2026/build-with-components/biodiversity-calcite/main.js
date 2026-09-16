@@ -418,22 +418,19 @@ async function handleSaveClick() {
     }
 }
 
-//////////////////////////////////////////////////////
-//  Init UI
-//////////////////////////////////////////////////////
-
 async function buildGalleryUrl() {
     const [Portal] = await $arcgis.import(["@arcgis/core/portal/Portal.js"]);
 
     const portal = Portal.getDefault();
     await portal.load();
 
-    // Org-specific portals expose a urlKey subdomain (e.g. "myorg"); the default
-    // anonymous portal does not, so fall back to customBaseUrl alone.
     const host = portal.urlKey ? `${portal.urlKey}.${portal.customBaseUrl}` : portal.customBaseUrl;
-
     return `https://${host}${GALLERY_PATH}`;
 }
+
+//////////////////////////////////////////////////////
+//  Init UI
+//////////////////////////////////////////////////////
 
 function init() {
     saveAction.addEventListener("click", () => handleSaveClick());
