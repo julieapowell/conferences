@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description"
+        content="Explore global biodiversity and conservation maps shared by researchers and mapmakers." />
+    <title>Living Biodiversity Atlas</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="./gallery.css" />
+    <script type="module" src="https://js.arcgis.com/5.1/"></script>
+</head>
+
+<body>
+    <calcite-shell>
+        <calcite-navigation slot="header">
+            <calcite-action id="filterAction" slot="navigation-action" icon="sliders-horizontal" text="Filters"
+                hidden></calcite-action>
+            <calcite-navigation-logo slot="logo" icon="organization" heading="Living Biodiversity Atlas"
+                description="Global conservation map gallery"></calcite-navigation-logo>
+            <calcite-navigation-user id="navigationUser" slot="user" label="Signed-in user"
+                hidden></calcite-navigation-user>
+            <calcite-action id="signOutButton" slot="content-end" icon="sign-out" text="Sign out"
+                hidden></calcite-action>
+        </calcite-navigation>
+
+        <main class="gallery-page">
+            <section id="collectionBanner" class="collection-banner" aria-labelledby="groupTitle">
+                <div class="collection-banner-shade" aria-hidden="true"></div>
+                <div class="collection-copy">
+                    <p class="eyebrow">Curated map collection</p>
+                    <h1 id="groupTitle">Global Biodiversity and Conservation Maps</h1>
+                    <p id="groupDescription">Explore maps that reveal biodiversity patterns, conservation priorities,
+                        and human pressures around the world.</p>
+                    <calcite-link id="groupLink" target="_blank" rel="noopener noreferrer" icon-end="launch">
+                        View the ArcGIS group (opens in a new window)
+                    </calcite-link>
+                </div>
+                <div class="collection-stats" aria-label="Collection summary">
+                    <calcite-chip id="mapCount" scale="s" icon="map">0 maps</calcite-chip>
+                    <calcite-chip id="contributorCount" scale="s" icon="users">0 contributors</calcite-chip>
+                    <calcite-chip id="updatedDate" scale="s" icon="clock">Updated —</calcite-chip>
+                </div>
+            </section>
+
+            <div class="browse-layout">
+                <aside id="filterRail" class="filter-rail" aria-label="Filter maps">
+                    <calcite-panel id="filterControls" class="filter-controls" heading="Find a map"
+                        description="Discover">
+                        <calcite-action id="closeFilterButton" slot="header-actions-end" icon="x"
+                            text="Close filters"></calcite-action>
+
+                        <calcite-label>
+                            Search the collection
+                            <calcite-input-text id="searchInput" icon="search"
+                                placeholder="Species, habitat, population…" clearable></calcite-input-text>
+                        </calcite-label>
+
+                        <calcite-label>
+                            Conservation focus
+                            <calcite-select id="focusSelect">
+                                <calcite-option value="all" selected>All topics</calcite-option>
+                                <calcite-option value="species">Species</calcite-option>
+                                <calcite-option value="habitats">Land &amp; habitats</calcite-option>
+                                <calcite-option value="people">People &amp; pressure</calcite-option>
+                                <calcite-option value="overview">Overview</calcite-option>
+                            </calcite-select>
+                        </calcite-label>
+
+                        <calcite-label>
+                            Sort maps
+                            <calcite-select id="sortSelect">
+                                <calcite-option value="newest" selected>Recently updated</calcite-option>
+                                <calcite-option value="oldest">Oldest first</calcite-option>
+                                <calcite-option value="title">Title</calcite-option>
+                                <calcite-option value="views">Most viewed</calcite-option>
+                            </calcite-select>
+                        </calcite-label>
+
+                        <calcite-button id="clearFiltersButton" appearance="outline" icon-start="reset" width="full">
+                            Clear filters
+                        </calcite-button>
+
+                        <calcite-notice class="field-note" kind="info" scale="s" open>
+                            <calcite-notice-message slot="message">
+                                Maps are contributed by members of the Global Biodiversity and Conservation Maps group.
+                            </calcite-notice-message>
+                        </calcite-notice>
+                    </calcite-panel>
+                </aside>
+
+                <section class="gallery-results" aria-labelledby="galleryHeading">
+                    <header class="results-header">
+                        <div>
+                            <p class="eyebrow">Explore the collection</p>
+                            <h2 id="galleryHeading">Conservation maps</h2>
+                        </div>
+                        <calcite-chip id="resultsCount" scale="m" icon="map">Loading maps</calcite-chip>
+                    </header>
+
+                    <calcite-loader id="galleryLoader" label="Loading biodiversity maps" type="indeterminate"
+                        scale="l"></calcite-loader>
+
+                    <calcite-notice id="galleryNotice" open hidden>
+                        <calcite-notice-title slot="title"></calcite-notice-title>
+                        <calcite-notice-message slot="message"></calcite-notice-message>
+                    </calcite-notice>
+
+                    <calcite-card-group id="galleryGrid" label="Biodiversity map gallery"></calcite-card-group>
+                </section>
+            </div>
+        </main>
+
+        <calcite-sheet id="filterSheet" slot="sheets" position="inline-start" width-scale="m"
+            label="Filter biodiversity maps">
+            <div id="mobileFilterMount"></div>
+        </calcite-sheet>
+
+        <calcite-dialog id="mapDialog" kind="brand" width-scale="l" placement="cover" modal
+            aria-label="Explore selected biodiversity map">
+            <div class="map-viewer-layout">
+                <calcite-panel class="map-details" heading="Interactive map">
+                    <p id="viewerDescription" class="viewer-description"></p>
+                    <dl class="map-metadata">
+                        <div>
+                            <dt>Contributor</dt>
+                            <dd id="viewerOwner"></dd>
+                        </div>
+                        <div>
+                            <dt>Updated</dt>
+                            <dd id="viewerUpdated"></dd>
+                        </div>
+                    </dl>
+                    <div id="viewerTags" class="viewer-tags" aria-label="Map topics"></div>
+                    <calcite-link id="viewerItemLink" target="_blank" rel="noopener noreferrer" icon-end="launch">
+                        Open item details (opens in a new window)
+                    </calcite-link>
+                </calcite-panel>
+                <arcgis-map id="viewerMap">
+                    <arcgis-zoom slot="top-left"></arcgis-zoom>
+                    <arcgis-home slot="top-left"></arcgis-home>
+                    <arcgis-legend slot="bottom-right"></arcgis-legend>
+                </arcgis-map>
+            </div>
+        </calcite-dialog>
+    </calcite-shell>
+
+    <script type="module" src="./gallery.js"></script>
+</body>
+
+</html>

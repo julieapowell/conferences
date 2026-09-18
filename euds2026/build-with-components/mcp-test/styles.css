@@ -1,0 +1,188 @@
+:root {
+    color-scheme: light;
+    --forest-950: #203218;
+    --forest-800: #38552a;
+    --sage-600: #75994d;
+    --sage-300: #b8cf91;
+    --mist-100: #eef5e9;
+    --ivory-50: #fbfcf7;
+    --warm-line: #d8dfcc;
+    --calcite-color-brand: var(--sage-600);
+    --calcite-color-brand-hover: #64863f;
+    --calcite-color-brand-press: #526f32;
+    --calcite-color-surface-1: var(--ivory-50);
+    --calcite-color-surface-2: #f4f8ef;
+    --calcite-color-surface-3: #e9f1e2;
+    --calcite-color-surface-4: #dce8d1;
+    --calcite-color-text-1: var(--forest-950);
+    --calcite-color-text-2: #4e6141;
+    --calcite-color-text-3: #718065;
+    --calcite-color-text-inverse: #ffffff;
+    --calcite-color-text-link: #527735;
+    --calcite-color-text-highlight: #334f25;
+    --calcite-color-border-1: #bdcbae;
+    --calcite-color-border-2: var(--warm-line);
+    --calcite-color-border-3: #e7ecdf;
+    --calcite-color-border-input: #98aa89;
+    --calcite-color-status-info: #577b3a;
+    --calcite-color-status-success: #477638;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body,
+calcite-shell,
+arcgis-map {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    background: linear-gradient(135deg, #dbe8d5 0%, var(--mist-100) 52%, #d4e4d3 100%);
+    color: var(--forest-950);
+    font-family: "Avenir Next", "Segoe UI", sans-serif;
+}
+
+calcite-navigation {
+    --calcite-navigation-background-color: rgba(226, 237, 218, 0.97);
+    border-block-end: 1px solid rgba(56, 85, 42, 0.22);
+    box-shadow: 0 5px 24px rgba(32, 50, 24, 0.11);
+    backdrop-filter: blur(12px);
+}
+
+calcite-navigation-logo {
+    --calcite-color-text-1: var(--forest-950);
+    --calcite-color-text-2: #657658;
+}
+
+#navigationUser {
+    --calcite-navigation-user-avatar-color: var(--forest-800);
+    --calcite-navigation-user-full-name-text-color: var(--forest-950);
+    --calcite-navigation-user-name-text-color: #657658;
+}
+
+calcite-shell-panel {
+    --calcite-shell-panel-min-width: 320px;
+    --calcite-shell-panel-max-width: 440px;
+    --calcite-color-surface-1: #e5eedf;
+    --calcite-color-surface-2: #f8faf3;
+    --calcite-color-surface-3: #dbe8d3;
+    --calcite-color-surface-4: #cfdfc4;
+    background: rgba(229, 238, 223, 0.97);
+    border-inline-end: 1px solid rgba(56, 85, 42, 0.22);
+    box-shadow: 10px 0 32px rgba(32, 50, 24, 0.14);
+    backdrop-filter: blur(16px);
+}
+
+calcite-panel {
+    --calcite-color-surface-1: #e5eedf;
+    --calcite-color-surface-2: #f8faf3;
+    --calcite-panel-background-color: transparent;
+    height: 100%;
+}
+
+calcite-block {
+    --calcite-color-surface-1: #fbfcf7;
+    --calcite-color-surface-2: #f5f8ef;
+    margin: 0 0.75rem 0.75rem;
+    border: 1px solid rgba(117, 153, 77, 0.28);
+    border-radius: 8px;
+    box-shadow: 0 5px 18px rgba(32, 50, 24, 0.07);
+    overflow: hidden;
+}
+
+calcite-label {
+    color: var(--forest-800);
+    font-weight: 600;
+}
+
+calcite-select {
+    --calcite-input-background-color: #ffffff;
+    --calcite-input-border-color: #98aa89;
+    --calcite-input-text-color: var(--forest-950);
+}
+
+calcite-combobox {
+    --calcite-combobox-input-background-color: #ffffff;
+    --calcite-combobox-input-border-color: #98aa89;
+    --calcite-combobox-input-text-color: var(--forest-950);
+    width: 100%;
+}
+
+.color-ramp-preview {
+    display: flex;
+    flex: 0 0 7rem;
+    width: 7rem;
+    height: 1.125rem;
+    overflow: hidden;
+    border: 1px solid rgba(32, 50, 24, 0.24);
+}
+
+.color-ramp-preview > * {
+    display: block;
+    max-width: 100%;
+}
+
+#statusNotice,
+#loader,
+#saveButton {
+    margin: 0 0.75rem 0.75rem;
+}
+
+#statusNotice {
+    --calcite-color-foreground-1: rgba(251, 252, 247, 0.96);
+}
+
+#loader {
+    display: block;
+    padding-block: 1rem;
+    --calcite-color-brand: var(--sage-600);
+}
+
+#loader[hidden] {
+    display: none;
+}
+
+#saveButton {
+    width: calc(100% - 1.5rem);
+}
+
+#styleMenuButton {
+    margin: 0.75rem;
+    --calcite-color-brand: var(--forest-800);
+    filter: drop-shadow(0 5px 12px rgba(32, 50, 24, 0.18));
+}
+
+arcgis-zoom,
+arcgis-home,
+arcgis-legend {
+    --calcite-color-surface-1: rgba(251, 252, 247, 0.96);
+    --calcite-color-brand: var(--forest-800);
+    filter: drop-shadow(0 5px 12px rgba(32, 50, 24, 0.18));
+}
+
+@media (max-width: 700px) {
+    calcite-navigation-logo {
+        max-width: 7.5rem;
+    }
+
+    calcite-shell-panel {
+        --calcite-shell-panel-min-width: min(92vw, 24rem);
+        --calcite-shell-panel-max-width: min(92vw, 24rem);
+    }
+
+    calcite-block,
+    #statusNotice,
+    #loader,
+    #saveButton {
+        margin-inline: 0.625rem;
+    }
+
+    #saveButton {
+        width: calc(100% - 1.25rem);
+    }
+}

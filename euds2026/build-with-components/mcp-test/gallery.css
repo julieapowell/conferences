@@ -1,0 +1,523 @@
+:root {
+    color-scheme: light;
+    --forest-950: #203218;
+    --forest-800: #38552a;
+    --moss-700: #55763b;
+    --sage-600: #789c50;
+    --sage-300: #b8cf91;
+    --sage-150: #dce9d2;
+    --mist-100: #eef5e9;
+    --ivory-50: #fbfcf7;
+    --warm-line: #d7dfcd;
+    --calcite-color-brand: var(--moss-700);
+    --calcite-color-brand-hover: #46652f;
+    --calcite-color-brand-press: #334d24;
+    --calcite-color-surface-1: var(--ivory-50);
+    --calcite-color-surface-2: #f3f7ee;
+    --calcite-color-surface-3: #e7efe1;
+    --calcite-color-surface-4: #d8e5ce;
+    --calcite-color-text-1: var(--forest-950);
+    --calcite-color-text-2: #4d6041;
+    --calcite-color-text-3: #6d7d63;
+    --calcite-color-text-inverse: #ffffff;
+    --calcite-color-text-link: #4e7334;
+    --calcite-color-text-highlight: #314a22;
+    --calcite-color-border-1: #b9c8ad;
+    --calcite-color-border-2: var(--warm-line);
+    --calcite-color-border-3: #e6ebdf;
+    --calcite-color-border-input: #91a481;
+    --calcite-color-status-info: #55783b;
+    --calcite-color-status-success: #477638;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body,
+calcite-shell {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    background:
+        linear-gradient(rgba(238, 245, 233, 0.84), rgba(238, 245, 233, 0.96)),
+        radial-gradient(circle at 12% 12%, #cbdcbd 0, transparent 32%),
+        radial-gradient(circle at 88% 18%, #dce8c7 0, transparent 28%),
+        #e6efe0;
+    color: var(--forest-950);
+    font-family: "Avenir Next", "Segoe UI", sans-serif;
+}
+
+h1,
+h2,
+p {
+    margin-block-start: 0;
+}
+
+h1,
+h2 {
+    color: var(--forest-950);
+    font-family: Georgia, "Times New Roman", serif;
+    font-weight: 700;
+    letter-spacing: 0;
+}
+
+calcite-navigation {
+    --calcite-navigation-background-color: rgba(234, 242, 227, 0.96);
+    border-block-end: 1px solid rgba(56, 85, 42, 0.2);
+    box-shadow: 0 4px 20px rgba(32, 50, 24, 0.1);
+    backdrop-filter: blur(14px);
+}
+
+calcite-navigation-logo {
+    --calcite-color-text-1: var(--forest-950);
+    --calcite-color-text-2: #657658;
+}
+
+#navigationUser {
+    --calcite-navigation-user-avatar-color: var(--forest-800);
+    --calcite-navigation-user-full-name-text-color: var(--forest-950);
+    --calcite-navigation-user-name-text-color: #657658;
+}
+
+#signOutButton,
+#filterAction {
+    --calcite-color-brand: var(--forest-800);
+}
+
+.gallery-page {
+    min-height: 100%;
+    padding: 1.5rem clamp(1rem, 3vw, 3rem) 3rem;
+}
+
+.collection-banner {
+    --collection-image: none;
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(28rem, 0.72fr);
+    min-height: 21rem;
+    max-width: 92rem;
+    margin: 0 auto 1.5rem;
+    overflow: hidden;
+    background-color: var(--forest-950);
+    background-image: var(--collection-image);
+    background-position: center;
+    background-size: cover;
+    border-radius: 8px;
+    box-shadow: 0 18px 44px rgba(32, 50, 24, 0.18);
+    isolation: isolate;
+}
+
+.collection-banner-shade {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(90deg, rgba(24, 44, 17, 0.96) 0%, rgba(32, 50, 24, 0.88) 48%, rgba(32, 50, 24, 0.22) 100%);
+}
+
+.collection-copy {
+    align-self: center;
+    max-width: 46rem;
+    padding: clamp(2rem, 5vw, 4.5rem);
+    color: #f5f8ef;
+}
+
+.collection-copy h1 {
+    max-width: 15ch;
+    margin-block-end: 0.8rem;
+    color: #ffffff;
+    font-size: clamp(2rem, 4vw, 3.75rem);
+    line-height: 1.02;
+}
+
+.collection-copy>p:not(.eyebrow) {
+    max-width: 56ch;
+    margin-block-end: 1.25rem;
+    color: #dce8d3;
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+.collection-copy calcite-link {
+    --calcite-color-text-link: #d9eba9;
+    font-weight: 600;
+}
+
+.eyebrow {
+    margin-block-end: 0.4rem;
+    color: var(--sage-600);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0;
+    text-transform: uppercase;
+}
+
+.collection-copy .eyebrow {
+    color: #c7dc99;
+}
+
+.collection-stats {
+    align-self: end;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.4rem;
+    margin: 0 1.5rem 1.5rem;
+}
+
+.collection-stats calcite-chip {
+    --calcite-chip-background-color: rgba(238, 245, 233, 0.82);
+    --calcite-chip-text-color: #425637;
+}
+
+.browse-layout {
+    display: grid;
+    grid-template-columns: 18rem minmax(0, 1fr);
+    gap: 2rem;
+    max-width: 92rem;
+    margin: 0 auto;
+    align-items: start;
+}
+
+.filter-rail {
+    position: sticky;
+    top: 1.5rem;
+    border: 1px solid rgba(56, 85, 42, 0.16);
+    border-radius: 8px;
+    box-shadow: 0 10px 28px rgba(32, 50, 24, 0.1);
+    overflow: hidden;
+    backdrop-filter: blur(12px);
+}
+
+.results-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.results-header h2 {
+    margin-block-end: 0;
+    font-size: 1.55rem;
+}
+
+#closeFilterButton {
+    display: none;
+}
+
+.filter-controls calcite-label {
+    margin-block-start: 1.25rem;
+}
+
+.filter-controls {
+    height: 100%;
+    --calcite-panel-background-color: rgba(229, 238, 223, 0.94);
+    --calcite-panel-content-space: 1.25rem;
+}
+
+calcite-input-text,
+calcite-select {
+    --calcite-input-background-color: #ffffff;
+    --calcite-input-border-color: #9caf8c;
+    --calcite-input-text-color: var(--forest-950);
+}
+
+.field-note {
+    margin-block-start: 1.5rem;
+    --calcite-color-foreground-1: rgba(238, 245, 233, 0.72);
+}
+
+.gallery-results {
+    min-width: 0;
+}
+
+.results-header {
+    margin-block: 0.25rem 1rem;
+}
+
+#resultsCount,
+.map-chips calcite-chip,
+.viewer-tags calcite-chip {
+    --calcite-chip-background-color: #e0ead7;
+    --calcite-chip-text-color: var(--forest-800);
+}
+
+#galleryLoader {
+    display: block;
+    min-height: 12rem;
+    padding-block: 4rem;
+    --calcite-color-brand: var(--sage-600);
+}
+
+#galleryLoader[hidden] {
+    display: none;
+}
+
+#galleryNotice {
+    margin-block: 1rem;
+}
+
+#galleryGrid {
+    display: block;
+    width: 100%;
+}
+
+.map-card {
+    width: calc((100% - 2rem) / 3);
+    min-width: 0;
+    --calcite-card-background-color: rgba(251, 252, 247, 0.98);
+    --calcite-card-border-color: rgba(56, 85, 42, 0.16);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(32, 50, 24, 0.09);
+    overflow: hidden;
+    transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.map-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 32px rgba(32, 50, 24, 0.15);
+}
+
+.map-thumbnail {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    background: #d9e5d1;
+}
+
+.map-thumbnail-fallback {
+    display: grid;
+    place-items: center;
+    color: var(--moss-700);
+    background:
+        linear-gradient(135deg, rgba(120, 156, 80, 0.18), rgba(56, 85, 42, 0.08)),
+        #edf4e8;
+}
+
+.map-summary {
+    display: -webkit-box;
+    min-height: 4.2em;
+    margin-block-end: 0;
+    overflow: hidden;
+    color: #58694d;
+    font-size: 0.84rem;
+    line-height: 1.4;
+    -webkit-box-orient: vertical;
+    line-clamp: 3;
+    -webkit-line-clamp: 3;
+}
+
+.map-card-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.map-author {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    min-width: 0;
+}
+
+.map-author-text {
+    min-width: 0;
+    overflow: hidden;
+    color: #425637;
+    font-size: 0.8rem;
+    font-weight: 400;
+    line-height: 1.35;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.map-chips,
+.viewer-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+#filterSheet {
+    --calcite-sheet-scrim-background: rgba(24, 44, 17, 0.46);
+}
+
+#mobileFilterMount {
+    height: 100%;
+    padding: 0;
+    background: #e5eedf;
+}
+
+#mapDialog {
+    --calcite-dialog-size-x: 100%;
+    --calcite-dialog-size-y: 100%;
+}
+
+.map-viewer-layout {
+    display: grid;
+    grid-template-columns: 17rem minmax(0, 1fr);
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+}
+
+.map-details {
+    border-inline-end: 1px solid rgba(56, 85, 42, 0.16);
+    --calcite-panel-background-color: #e5eedf;
+    --calcite-panel-content-space: 1.5rem;
+}
+
+.viewer-description {
+    color: #506244;
+    line-height: 1.55;
+}
+
+.map-metadata {
+    margin-block: 1.5rem;
+}
+
+.map-metadata div {
+    padding-block: 0.75rem;
+    border-block-start: 1px solid rgba(56, 85, 42, 0.14);
+}
+
+.map-metadata dt {
+    color: #718065;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.map-metadata dd {
+    margin: 0.25rem 0 0;
+    color: var(--forest-950);
+    font-weight: 600;
+}
+
+.viewer-tags {
+    margin-block-end: 1.25rem;
+}
+
+#viewerMap {
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+}
+
+#viewerMap arcgis-zoom,
+#viewerMap arcgis-home,
+#viewerMap arcgis-legend {
+    --calcite-color-surface-1: rgba(251, 252, 247, 0.96);
+    --calcite-color-brand: var(--forest-800);
+    filter: drop-shadow(0 5px 12px rgba(32, 50, 24, 0.18));
+}
+
+@media (max-width: 1100px) {
+    .map-card {
+        width: calc((100% - 1rem) / 2);
+    }
+
+    .collection-banner {
+        grid-template-columns: minmax(0, 1fr) minmax(22rem, 0.65fr);
+    }
+}
+
+@media (max-width: 760px) {
+    calcite-navigation-logo {
+        max-width: 10rem;
+    }
+
+    .gallery-page {
+        padding: 0.75rem 0.75rem 2rem;
+    }
+
+    .collection-banner {
+        display: flex;
+        min-height: 28rem;
+        margin-block-end: 1rem;
+        flex-direction: column;
+        justify-content: flex-end;
+    }
+
+    .collection-banner-shade {
+        background: linear-gradient(0deg, rgba(24, 44, 17, 0.97) 0%, rgba(32, 50, 24, 0.76) 62%, rgba(32, 50, 24, 0.18) 100%);
+    }
+
+    .collection-copy {
+        padding: 5rem 1.25rem 1rem;
+    }
+
+    .collection-copy h1 {
+        font-size: 2.25rem;
+    }
+
+    .collection-copy>p:not(.eyebrow) {
+        display: -webkit-box;
+        overflow: hidden;
+        -webkit-box-orient: vertical;
+        line-clamp: 3;
+        -webkit-line-clamp: 3;
+    }
+
+    .collection-stats {
+        width: calc(100% - 2rem);
+        margin: 0 1rem 1rem;
+        justify-content: flex-start;
+    }
+
+    .browse-layout {
+        display: block;
+    }
+
+    .filter-rail {
+        display: none;
+    }
+
+    #closeFilterButton {
+        display: block;
+    }
+
+    .results-header {
+        padding-inline: 0.25rem;
+    }
+
+    .map-card {
+        width: 100%;
+    }
+
+    .map-card {
+        transition: none;
+    }
+
+    .map-card:hover {
+        transform: none;
+    }
+
+    .map-viewer-layout {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .map-details {
+        max-height: 13rem;
+        border-inline-end: 0;
+        border-block-end: 1px solid rgba(56, 85, 42, 0.16);
+        --calcite-panel-content-space: 1rem;
+    }
+
+    #viewerMap {
+        flex: 1 1 auto;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .map-card {
+        transition: none;
+    }
+}

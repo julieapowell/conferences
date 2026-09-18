@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Style biodiversity layers with ArcGIS smart mapping." />
+    <title>Biodiversity Style Lab</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="./styles.css" />
+    <script type="module" src="https://js.arcgis.com/5.1/"></script>
+</head>
+
+<body>
+    <calcite-shell>
+        <calcite-navigation slot="header">
+            <calcite-navigation-logo slot="logo" icon="effects" heading="Biodiversity Style Lab"
+                description="Explore conservation patterns"></calcite-navigation-logo>
+            <calcite-navigation-user id="navigationUser" slot="user" label="Signed-in user"
+                hidden></calcite-navigation-user>
+            <a id="galleryLink" slot="content-end" href="./gallery.html" target="_blank" rel="noopener noreferrer"
+                aria-label="Open map gallery">
+                <calcite-action icon="grid" text="Open map gallery"></calcite-action>
+            </a>
+            <calcite-action id="signOutButton" slot="content-end" icon="sign-out" text="Sign out"
+                hidden></calcite-action>
+        </calcite-navigation>
+
+        <calcite-shell-panel id="stylePanel" slot="panel-start" display-mode="dock" width-scale="m" resizable>
+            <calcite-panel heading="Build a visualization"
+                description="Style every compatible feature layer with shared attributes.">
+                <calcite-action id="closePanelButton" slot="header-actions-end" icon="x" text="Close style controls"
+                    hidden></calcite-action>
+
+                <calcite-block expanded heading="Data" description="One field is required; the second is optional.">
+                    <calcite-label>
+                        Primary attribute
+                        <calcite-select id="primaryField" disabled></calcite-select>
+                    </calcite-label>
+                    <calcite-label>
+                        Secondary attribute
+                        <calcite-select id="secondaryField" disabled></calcite-select>
+                    </calcite-label>
+                </calcite-block>
+
+                <calcite-block expanded heading="Style" description="Choose how the selected attributes are shown.">
+                    <calcite-label>
+                        Visualization
+                        <calcite-select id="styleControl" disabled>
+                            <calcite-option value="color" selected>Color</calcite-option>
+                            <calcite-option value="size">Size</calcite-option>
+                            <calcite-option value="relationship">Relationship</calcite-option>
+                            <calcite-option value="bivariate-color-size">Color by primary, size by secondary</calcite-option>
+                        </calcite-select>
+                    </calcite-label>
+                    <calcite-label id="themeLabel">
+                        Emphasis
+                        <calcite-select id="themeControl" disabled></calcite-select>
+                    </calcite-label>
+                    <calcite-label id="colorRampLabel">
+                        Color ramp
+                        <calcite-combobox id="colorRampControl" selection-mode="single-persist" max-items="8"
+                            overlay-positioning="fixed" placeholder="Choose a color ramp" clear-disabled
+                            disabled></calcite-combobox>
+                    </calcite-label>
+                </calcite-block>
+
+                <calcite-notice id="statusNotice" kind="info" icon="information" open>
+                    <calcite-notice-title slot="title">Loading WebMap</calcite-notice-title>
+                    <calcite-notice-message slot="message">Preparing biodiversity layers.</calcite-notice-message>
+                </calcite-notice>
+
+                <calcite-loader id="loader" label="Generating visualization" hidden></calcite-loader>
+
+                <calcite-button id="saveButton" width="full" appearance="outline" icon-start="save" disabled>
+                    Save and share WebMap
+                </calcite-button>
+
+                <calcite-button id="applyButton" slot="footer-start" icon-start="effects" disabled>
+                    Apply to layers
+                </calcite-button>
+                <calcite-button id="resetButton" slot="footer-end" appearance="outline" icon-start="reset" disabled>
+                    Reset
+                </calcite-button>
+            </calcite-panel>
+        </calcite-shell-panel>
+
+        <arcgis-map id="mapElement">
+            <arcgis-zoom slot="top-left"></arcgis-zoom>
+            <arcgis-home slot="top-left"></arcgis-home>
+            <arcgis-legend slot="bottom-right"></arcgis-legend>
+            <calcite-button id="styleMenuButton" slot="top-right" icon-start="effects" disabled hidden>
+                Style layers
+            </calcite-button>
+        </arcgis-map>
+    </calcite-shell>
+
+    <script type="module" src="./app.js"></script>
+</body>
+
+</html>
