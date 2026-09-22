@@ -15,9 +15,9 @@
             "@arcgis/core/identity/OAuthInfo.js",
         ]);
 
-        /* globalThis.esriConfig = {
-            portalUrl: "https://jsapi.maps.arcgis.com/"
-        } */
+        // globalThis.esriConfig = {
+        //     portalUrl: "https://jsapi.maps.arcgis.com/"
+        // } 
         const oAuthInfo = new OAuthInfo({
             appId: "No2Lhym7wqkgUyOG",
             //portalUrl: config.portalUrl
@@ -72,6 +72,9 @@
                         <calcite-tab-title icon-start="graph-bar" value="chart">
                             Scatter plot
                         </calcite-tab-title>
+                        <calcite-tab-title icon-start="selection" value="selection">
+                            Selection
+                        </calcite-tab-title>
                     </calcite-tab-nav>
                     <calcite-tab selected>
                         <calcite-notice open icon>
@@ -125,6 +128,13 @@
                         <arcgis-chart sync-view-selection>
                             <arcgis-charts-action-bar slot="action-bar"></arcgis-charts-action-bar>
                         </arcgis-chart>
+                    </calcite-tab>
+                    <calcite-tab>
+                        <calcite-block id="SelectedValueBlock" collapsed>
+                            <calcite-chip id="selection-variable-chip" kind="inverse" > fieldname </calcite-chip>
+                        </calcite-block>
+                        <arcgis-selection-toolbar reference-element="map"></arcgis-selection-toolbar>
+                        <arcgis-selection-list display-mode="feature" hidden id="selection-list" hide-menu hide-layer-filter hide-header label="Selection List" reference-element="map"></arcgis-selection-list>
                     </calcite-tab>
                 </calcite-tabs>
             </calcite-shell>

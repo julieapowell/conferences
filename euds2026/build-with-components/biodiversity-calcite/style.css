@@ -99,3 +99,7 @@ arcgis-chart {
     position: relative;
     margin-bottom: var(--calcite-spacing-lg);
 }
+
+#selection-variable-chip {
+   --calcite-chip-background-color: lightblue;
+}

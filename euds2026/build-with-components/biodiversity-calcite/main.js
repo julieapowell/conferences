@@ -18,8 +18,11 @@ const saveErrorAlert = document.getElementById("save-error-alert");
 const saveErrorMessage = document.getElementById("save-error-message");
 const galleryAction = document.getElementById("gallery-action");
 const selectedAttributeChip = document.getElementById("selected-attribute-chip");
+const selectionVariableChip = document.getElementById("selection-variable-chip");
 const popupElement = document.getElementById("popup");
 const similarFeaturesAction = document.getElementById("similar-features-action");
+const selectionList = document.getElementById("selection-list");
+const selectedValueBlock = document.getElementById("SelectedValueBlock");
 
 const SAVE_GROUP_TITLE = "Global Biodiversity and Conservation Maps";
 const GALLERY_PATH = "/apps/instant/gallery/index.html?appid=053eb0c7ab7345fca7bd43f94e4b9274&sortField=modified&sortOrder=desc&view=grid";
@@ -41,6 +44,9 @@ init();
 
 await mapElement.viewOnReady();
 const view = mapElement.view;
+
+view.selectionManager.on("selection-change", updateSelectionListVisibility);
+updateSelectionListVisibility();
 
 const {
     portalItem
@@ -71,6 +77,10 @@ let numericalFields = [];
 let selectedSizeField = null;
 const statisticsByField = new Map();
 
+
+function updateSelectionListVisibility() {
+    selectionList.hidden = !view.selectionManager.hasSelection;
+}
 function extractNumericalFields() {
     numericalFields = [];
 
@@ -118,11 +128,29 @@ async function populateAttributeLists() {
     });
 }
 
+function updateSelectionListChip(field, item) {
+    if (!field) {
+        return;
+    }
+
+    if (item){
+        selectedValueBlock.expanded = true;
+        selectedValueBlock.heading = `${field.alias}`;
+    }
+   
+    const itemValue = item?.graphic?.getAttribute(field.name);       
+    selectionVariableChip.textContent = item ? `${itemValue}` : "";
+    
+}
+
+
+
 function updateSelectedAttributeChip(field) {
     if (selectedAttributeChip && field) {
         selectedAttributeChip.textContent = field.alias;
     }
 }
+
 
 async function updateFeatureTable(field) {
     if (!featureTable || !field) {
@@ -168,6 +196,7 @@ function initializeFromExistingRenderer() {
     if (initialField && sizeValuePicker) {
         selectedSizeField = initialField;
         updateSelectedAttributeChip(initialField);
+        updateSelectionListChip(initialField, null);
         sizeValuePicker.currentValue = {
             value: initialField.name,
             label: initialField.alias
@@ -193,6 +222,7 @@ function wireUpEvents() {
             }
 
             updateSelectedAttributeChip(field);
+            updateSelectionListChip(field, null);
 
             if (selectedSizeField && selected.value === selectedSizeField.name) {
                 return;
@@ -349,6 +379,7 @@ chartElement.model.hideEmptyRowsAndColumns = true;
 chartElement.view = view;
 chartElement.layer = biodiversityLayer;
 
+
 //////////////////////////////////////////////////////
 //  Save the web map
 //////////////////////////////////////////////////////
@@ -472,7 +503,7 @@ function init() {
         const ro = new ResizeObserver(() => handleResponsiveLayout());
         ro.observe(shellPanelBottom);
     }
-
+    selectionList.afterListItemSelect = (ev) => updateSelectionListChip(selectedSizeField, ev.item);
     window.addEventListener("resize", handleResponsiveLayout);
     handleResponsiveLayout();
 }
