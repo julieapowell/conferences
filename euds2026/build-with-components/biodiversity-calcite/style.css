@@ -33,7 +33,16 @@ calcite-tab-nav {
 }
 
 calcite-notice {
-    margin: 1rem;
+    margin: var(--calcite-spacing-sm);
+}
+
+#map-configuration-blocks {
+    display: block;
+    margin: 0 var(--calcite-spacing-sm) var(--calcite-spacing-sm);
+}
+
+#map-configuration-blocks>calcite-block {
+    margin-block: 0;
 }
 
 #status-chip {
@@ -101,5 +110,5 @@ arcgis-chart {
 }
 
 #selection-variable-chip {
-   --calcite-chip-background-color: lightblue;
+    --calcite-chip-background-color: lightblue;
 }

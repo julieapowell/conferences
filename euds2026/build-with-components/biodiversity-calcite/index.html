@@ -80,45 +80,51 @@
                         <calcite-notice open icon>
                             <span slot="message">What field do you want to map?</span>
                         </calcite-notice>
-                        <calcite-block expanded heading="Available fields">
-                            <arcgis-value-picker>
-                                <arcgis-value-picker-combobox id="size-attribute-picker"
-                                    label="Size attribute"></arcgis-value-picker-combobox>
-                            </arcgis-value-picker>
-                        </calcite-block>
-                        <!-- Size Theme Selection -->
-                        <calcite-block expanded heading="Size Theme">
-                            <calcite-segmented-control id="size-theme-selector" width="full" appearance="outline">
-                                <calcite-segmented-control-item value="above"
-                                    checked>Above</calcite-segmented-control-item>
-                                <calcite-segmented-control-item value="below">Below</calcite-segmented-control-item>
-                                <calcite-segmented-control-item
-                                    value="above-and-below">Above/Below</calcite-segmented-control-item>
-                            </calcite-segmented-control>
-                        </calcite-block>
-                        <calcite-block id="symbol-style-block" expanded heading="Symbol style" hidden>
-                            <calcite-combobox id="symbol-style-selector" label="Symbol style"
-                                selection-mode="single-persist" selection-display="single" clear-disabled>
-                                <calcite-combobox-item value="caret" heading="Caret"></calcite-combobox-item>
-                                <calcite-combobox-item value="circle-caret"
-                                    heading="Circle caret"></calcite-combobox-item>
-                                <calcite-combobox-item value="arrow" heading="Arrow" selected></calcite-combobox-item>
-                                <calcite-combobox-item value="circle-arrow"
-                                    heading="Circle arrow"></calcite-combobox-item>
-                                <calcite-combobox-item value="plus-minus" heading="Plus/minus"></calcite-combobox-item>
-                                <calcite-combobox-item value="circle-plus-minus"
-                                    heading="Circle plus/minus"></calcite-combobox-item>
-                                <calcite-combobox-item value="square" heading="Square"></calcite-combobox-item>
-                                <calcite-combobox-item value="circle" heading="Circle"></calcite-combobox-item>
-                                <calcite-combobox-item value="triangle" heading="Triangle"></calcite-combobox-item>
-                                <calcite-combobox-item value="happy-sad" heading="Happy/sad"></calcite-combobox-item>
-                                <calcite-combobox-item value="thumb" heading="Thumb"></calcite-combobox-item>
-                            </calcite-combobox>
-                        </calcite-block>
-                        <calcite-block expanded>
-                            <arcgis-legend reference-element="map">
-                            </arcgis-legend>
-                        </calcite-block>
+                        <calcite-block-group id="map-configuration-blocks" label="Map configuration controls"
+                            expand-mode="multiple">
+                            <calcite-block expanded heading="Available fields">
+                                <arcgis-value-picker>
+                                    <arcgis-value-picker-combobox id="size-attribute-picker"
+                                        label="Size attribute"></arcgis-value-picker-combobox>
+                                </arcgis-value-picker>
+                            </calcite-block>
+                            <!-- Size Theme Selection -->
+                            <calcite-block expanded heading="Size Theme">
+                                <calcite-segmented-control id="size-theme-selector" width="full" appearance="outline">
+                                    <calcite-segmented-control-item value="above"
+                                        checked>Above</calcite-segmented-control-item>
+                                    <calcite-segmented-control-item value="below">Below</calcite-segmented-control-item>
+                                    <calcite-segmented-control-item
+                                        value="above-and-below">Above/Below</calcite-segmented-control-item>
+                                </calcite-segmented-control>
+                            </calcite-block>
+                            <calcite-block id="symbol-style-block" expanded heading="Symbol style" hidden>
+                                <calcite-combobox id="symbol-style-selector" label="Symbol style"
+                                    selection-mode="single-persist" selection-display="single" clear-disabled>
+                                    <calcite-combobox-item value="caret" heading="Caret"></calcite-combobox-item>
+                                    <calcite-combobox-item value="circle-caret"
+                                        heading="Circle caret"></calcite-combobox-item>
+                                    <calcite-combobox-item value="arrow" heading="Arrow"
+                                        selected></calcite-combobox-item>
+                                    <calcite-combobox-item value="circle-arrow"
+                                        heading="Circle arrow"></calcite-combobox-item>
+                                    <calcite-combobox-item value="plus-minus"
+                                        heading="Plus/minus"></calcite-combobox-item>
+                                    <calcite-combobox-item value="circle-plus-minus"
+                                        heading="Circle plus/minus"></calcite-combobox-item>
+                                    <calcite-combobox-item value="square" heading="Square"></calcite-combobox-item>
+                                    <calcite-combobox-item value="circle" heading="Circle"></calcite-combobox-item>
+                                    <calcite-combobox-item value="triangle" heading="Triangle"></calcite-combobox-item>
+                                    <calcite-combobox-item value="happy-sad"
+                                        heading="Happy/sad"></calcite-combobox-item>
+                                    <calcite-combobox-item value="thumb" heading="Thumb"></calcite-combobox-item>
+                                </calcite-combobox>
+                            </calcite-block>
+                            <calcite-block expanded heading="Legend">
+                                <arcgis-legend reference-element="map">
+                                </arcgis-legend>
+                            </calcite-block>
+                        </calcite-block-group>
                     </calcite-tab>
                     <calcite-tab>
                         <arcgis-feature-table reference-element="map" map-layer-id="1a06d698622-layer-5"
@@ -131,10 +137,12 @@
                     </calcite-tab>
                     <calcite-tab>
                         <calcite-block id="SelectedValueBlock" collapsed>
-                            <calcite-chip id="selection-variable-chip" kind="inverse" > fieldname </calcite-chip>
+                            <calcite-chip id="selection-variable-chip" kind="inverse"> fieldname </calcite-chip>
                         </calcite-block>
                         <arcgis-selection-toolbar reference-element="map"></arcgis-selection-toolbar>
-                        <arcgis-selection-list display-mode="feature" hidden id="selection-list" hide-menu hide-layer-filter hide-header label="Selection List" reference-element="map"></arcgis-selection-list>
+                        <arcgis-selection-list display-mode="feature" hidden id="selection-list" hide-menu
+                            hide-layer-filter hide-header label="Selection List"
+                            reference-element="map"></arcgis-selection-list>
                     </calcite-tab>
                 </calcite-tabs>
             </calcite-shell>
