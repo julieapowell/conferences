@@ -1,0 +1,234 @@
+:root {
+    --water-deep: #083b4a;
+    --water-teal: #007f8b;
+    --water-cyan: #00aeca;
+    --water-mint: #73cdb4;
+    --water-foam: #f4fbfa;
+    --water-mist: #e3f5f2;
+    --water-border: #a9d8d2;
+    --calcite-color-brand: var(--water-teal);
+    --calcite-color-brand-hover: #006873;
+    --calcite-color-brand-press: #00505b;
+    --calcite-color-brand-underline: rgb(0 127 139 / 40%);
+    --calcite-ui-brand: var(--water-teal);
+    --calcite-ui-brand-hover: #006873;
+    --calcite-ui-brand-press: #00505b;
+    --calcite-color-surface-1: var(--water-foam);
+    --calcite-color-surface-2: #ffffff;
+    --calcite-color-surface-3: var(--water-mist);
+    --calcite-color-surface-4: #d2ece8;
+    --calcite-color-surface-highlight: #d3f4ef;
+    --calcite-color-background: var(--water-foam);
+    --calcite-color-foreground-1: #ffffff;
+    --calcite-color-foreground-2: var(--water-mist);
+    --calcite-color-foreground-3: #d2ece8;
+    --calcite-color-foreground-current: #d3f4ef;
+    --calcite-color-text-1: var(--water-deep);
+    --calcite-color-text-2: #315c65;
+    --calcite-color-text-3: #58777d;
+    --calcite-color-text-inverse: #ffffff;
+    --calcite-color-text-link: #006f7c;
+    --calcite-color-text-highlight: #d3f4ef;
+    --calcite-color-border-1: var(--water-border);
+    --calcite-color-border-2: #c7e6e2;
+    --calcite-color-border-3: #dcefeb;
+    --calcite-color-border-input: #699f9e;
+    --calcite-color-focus: var(--water-teal);
+    --calcite-ui-focus-color: var(--water-teal);
+    --calcite-ui-focus-color-inverse: #ffffff;
+    --calcite-ui-background: var(--water-foam);
+    --calcite-ui-foreground-1: #ffffff;
+    --calcite-ui-foreground-2: var(--water-mist);
+    --calcite-ui-foreground-3: #d2ece8;
+    --calcite-ui-foreground-current: #d3f4ef;
+    --calcite-ui-text-1: var(--water-deep);
+    --calcite-ui-text-2: #315c65;
+    --calcite-ui-text-3: #58777d;
+    --calcite-ui-text-inverse: #ffffff;
+    --calcite-ui-text-link: #006f7c;
+    --calcite-ui-border-1: var(--water-border);
+    --calcite-ui-border-2: #c7e6e2;
+    --calcite-ui-border-3: #dcefeb;
+    --calcite-ui-border-input: #699f9e;
+}
+
+html,
+body {
+    height: 100%;
+    margin: 0;
+    background: var(--water-foam);
+    color: var(--water-deep);
+    font-family: "Avenir Next", Avenir, sans-serif;
+}
+
+calcite-navigation {
+    --calcite-navigation-background-color: transparent;
+    --calcite-navigation-border-color: rgb(255 255 255 / 22%);
+    --calcite-color-text-1: #ffffff;
+    --calcite-color-text-2: #dffaf7;
+    --calcite-color-text-3: #b9e9e4;
+    background: linear-gradient(105deg, var(--water-deep) 0%, #086d79 58%, #12aeb4 100%);
+    box-shadow: 0 3px 16px rgb(8 59 74 / 24%);
+}
+
+calcite-navigation-logo {
+    --calcite-navigation-logo-heading-text-color: #ffffff;
+    --calcite-navigation-logo-text-color: #dffaf7;
+}
+
+calcite-flow {
+    min-height: 100%;
+}
+
+calcite-flow-item {
+    --calcite-flow-background-color: var(--water-foam);
+    --calcite-flow-border-color: var(--water-border);
+}
+
+calcite-panel {
+    --calcite-panel-background-color: var(--water-foam);
+    --calcite-panel-border-color: var(--water-border);
+    --calcite-panel-heading-text-color: var(--water-deep);
+    --calcite-panel-description-text-color: #476c73;
+    --calcite-panel-header-background-color: #e7f7f4;
+    --calcite-panel-header-action-background-color: transparent;
+    --calcite-panel-header-action-background-color-hover: #cdebe6;
+    --calcite-panel-header-action-text-color: var(--water-teal);
+}
+
+calcite-block {
+    --calcite-block-background-color: transparent;
+    --calcite-block-heading-text-color: var(--water-deep);
+    --calcite-block-icon-color: var(--water-teal);
+    --calcite-block-border-color: var(--water-border);
+}
+
+calcite-shell-panel {
+    --calcite-shell-panel-width: 390px;
+    --calcite-shell-panel-min-width: 390px;
+}
+
+calcite-chip {
+    --chip-color: var(--water-teal);
+    --calcite-color-brand: var(--chip-color);
+    --calcite-color-text-1: var(--chip-color);
+    --calcite-chip-background-color: #dcefeb;
+    --calcite-chip-border-color: #b7dcd7;
+    --calcite-chip-icon-color: var(--chip-color);
+    --calcite-chip-select-icon-color: var(--chip-color);
+    --calcite-chip-text-color: var(--chip-color);
+    --calcite-chip-corner-radius: 999px;
+}
+
+calcite-chip[selected] {
+    --calcite-chip-background-color: #b8e3dc;
+    --calcite-chip-border-color: #70bcb6;
+}
+
+calcite-chip:nth-of-type(1) {
+    --chip-color: #c44f45;
+}
+
+calcite-chip:nth-of-type(2) {
+    --chip-color: #007f8b;
+}
+
+calcite-chip:nth-of-type(3) {
+    --chip-color: #3976b8;
+}
+
+calcite-chip:nth-of-type(4) {
+    --chip-color: #278b70;
+}
+
+calcite-chip:nth-of-type(5) {
+    --chip-color: #bd7b13;
+}
+
+calcite-chip:nth-of-type(6) {
+    --chip-color: #815d78;
+}
+
+arcgis-legend {
+    --calcite-color-surface-2: var(--water-foam);
+    --calcite-color-foreground-1: var(--water-foam);
+}
+
+.mobile-only {
+    display: none;
+}
+
+.mobile-slider {
+    display: none;
+}
+
+arcgis-time-bar {
+    --calcite-color-surface-1: #ffffff;
+    --calcite-color-surface-2: #ffffff;
+    --calcite-color-foreground-1: #ffffff;
+    --calcite-color-border-1: var(--water-border);
+    background: #ffffff;
+    width: 100%;
+    padding-right: 0;
+    padding-left: 0;
+}
+
+calcite-panel {
+    --calcite-panel-width: 390px;
+    --calcite-panel-min-width: 390px;
+}
+
+arcgis-zoom,
+arcgis-expand {
+    --calcite-color-brand: var(--water-teal);
+    --calcite-color-surface-1: rgb(255 255 255 / 94%);
+    --calcite-color-border-1: var(--water-border);
+}
+
+calcite-sheet {
+    --calcite-sheet-background-color: var(--water-foam);
+    --calcite-sheet-scrim-background-color: rgb(8 59 74 / 28%);
+}
+
+@media (max-width: 900px) {
+    .mobile-only {
+        display: inline-flex;
+    }
+
+    calcite-navigation-logo {
+        min-width: 0;
+        max-width: calc(100vw - 3.5rem);
+        overflow: hidden;
+    }
+
+    .desktop-panel {
+        display: none;
+    }
+
+    .mobile-slider {
+        display: block;
+        position: absolute;
+        left: 0.3rem;
+        right: 0.3rem;
+        bottom: 0.5rem;
+        width: auto;
+        box-sizing: border-box;
+        padding: 0.5rem 0.75rem;
+        border: 1px solid rgb(169 216 210 / 88%);
+        border-radius: 6px;
+        background: #ffffff;
+        box-shadow: 0 8px 24px rgb(8 59 74 / 24%);
+        backdrop-filter: blur(10px);
+    }
+
+    calcite-chip-group {
+        display: none;
+    }
+
+    #analysis-sheet arcgis-legend {
+        display: block;
+        width: auto;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+}

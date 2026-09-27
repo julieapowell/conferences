@@ -1,0 +1,61 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0" />
+  <title>ArcGIS Maps SDK for JavaScript CDN template</title>
+  <link rel="icon" href="data:;base64,=" />
+  <style>
+    html,
+    body {
+      background-color: var(--calcite-ui-foreground-2);
+      height: 100%;
+      margin: 0;
+    }
+
+    arcgis-chart {
+      width: 350px;
+      height: 250px;
+    }
+  </style>
+  <!-- Load the ArcGIS Maps SDK for JavaScript from the CDN -->
+  <script type="module" src="https://js.arcgis.com/5.2.0-next/"></script>
+</head>
+
+<body>
+  <!-- The Shell component is used as a layout for this template -->
+  <calcite-shell content-behind>
+    <calcite-navigation slot="header">
+      <!-- Heading and description dynamically populated below using JavaScript -->
+      <calcite-navigation-logo heading-level="1" slot="logo"></calcite-navigation-logo>
+    </calcite-navigation>
+
+    <arcgis-map item-id="dd4b2f25487d4a37a45093ba6acd026d" popup-component-enabled>
+      <arcgis-zoom slot="top-left"></arcgis-zoom>
+      <arcgis-search slot="top-right"></arcgis-search>
+      <arcgis-expand slot="bottom-left">
+        <arcgis-legend></arcgis-legend>
+      </arcgis-expand>
+
+      <arcgis-chart layer-item-id="b1717962dab247ad93eaca257b32fe02" chart-index="1" slot="bottom-right"></arcgis-chart>
+    </arcgis-map>
+  </calcite-shell>
+</body>
+
+<script type="module">
+  const viewElement = document.querySelector("arcgis-map");
+  const calciteNavLogo = document.querySelector("calcite-navigation-logo");
+
+  viewElement.addEventListener("arcgisViewReadyChange", () => {
+    // Use metadata from the Web Map to populate the header
+    const { title, description } = viewElement.map.portalItem;
+
+    if (calciteNavLogo) {
+      calciteNavLogo.heading = title === "" ? "A web map" : title;
+    }
+
+  });
+</script>
+
+</html>

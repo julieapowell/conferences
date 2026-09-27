@@ -1,0 +1,50 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0" />
+  <title>ArcGIS Maps SDK for JavaScript CDN template</title>
+  <link rel="icon" href="data:;base64,=" />
+  <style>
+    html,
+    body {
+      background-color: var(--calcite-ui-foreground-2);
+      height: 100%;
+      margin: 0;
+    }
+  </style>
+  <!-- Load the ArcGIS Maps SDK for JavaScript from the CDN -->
+  <script type="module" src="https://js.arcgis.com/5.2.0-next/"></script>
+
+</head>
+
+<body>
+  <!-- The Shell component is used as a layout for this template -->
+  <calcite-shell content-behind>
+    <calcite-navigation slot="header">
+      <!-- Heading and description dynamically populated below using JavaScript -->
+      <calcite-navigation-logo heading-level="1" slot="logo"></calcite-navigation-logo>
+    </calcite-navigation>
+    <calcite-panel>
+      <arcgis-map item-id="7446554baec348a095f5e4d9fcf1f5c9" popup-component-enabled id="map">
+        <arcgis-zoom slot="top-left"></arcgis-zoom>
+        <arcgis-search slot="top-right"></arcgis-search>
+        <arcgis-expand slot="top-left" group="top-left">
+          <arcgis-bookmarks></arcgis-bookmarks>
+        </arcgis-expand>
+        <arcgis-expand slot="top-left" group="top-left">
+          <arcgis-layer-list></arcgis-layer-list>
+        </arcgis-expand>
+        <arcgis-legend slot="bottom-left" legend-style="card" card-style-layout="stack"></arcgis-legend>
+      </arcgis-map>
+      <!-- time bar with reference to map -->
+      <arcgis-time-bar mode="time-window" reference-element="map" show-next show-play show-previous show-time-extent>
+        <arcgis-time-bar-slider slot="time-extent"></arcgis-time-bar-slider>
+      </arcgis-time-bar>
+    </calcite-panel>
+  </calcite-shell>
+  <script type="module" src="./main.js"></script>
+</body>
+
+</html>
