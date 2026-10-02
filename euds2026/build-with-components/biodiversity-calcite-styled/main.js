@@ -11,6 +11,7 @@ const symbolStyleBlock = document.getElementById("symbol-style-block");
 const colorRampAction = document.getElementById("color-ramp-action");
 const colorRampPopover = document.getElementById("color-ramp-popover");
 const colorRampList = document.getElementById("color-ramp-list");
+const chartTabTitle = sharedTabs?.querySelector('calcite-tab-title[value="chart"]');
 
 const shellPanelBottom = document.getElementById("shell-panel-bottom");
 const dialogEl = document.getElementById("dialog");
@@ -133,9 +134,10 @@ const biodiversityLayer = mapElement.map?.allLayers.find((layer) => {
 });
 
 await biodiversityLayer.load();
-const [colorSchemes, symbolUtils] = await $arcgis.import([
+const [colorSchemes, symbolUtils, univariateColorSizeRendererCreator] = await $arcgis.import([
     "@arcgis/core/smartMapping/symbology/color.js",
-    "@arcgis/core/symbols/support/symbolUtils.js"
+    "@arcgis/core/symbols/support/symbolUtils.js",
+    "@arcgis/core/smartMapping/renderers/univariateColorSize.js"
 ]);
 
 //////////////////////////////////////////////////////
@@ -152,6 +154,8 @@ const GRID_ID_FIELD = "Grid_ID";
 let numericalFields = [];
 let selectedSizeField = null;
 const statisticsByField = new Map();
+let mappingUpdateId = 0;
+let requestedMappingKey = "";
 
 
 function updateSelectionListVisibility() {
@@ -450,32 +454,49 @@ async function applyMapping() {
         return;
     }
 
-    const [univariateColorSizeRendererCreator] = await $arcgis.import([
-        "@arcgis/core/smartMapping/renderers/univariateColorSize.js"
-    ]);
-
+    const field = selectedSizeField;
     const sizeTheme = sizeThemeSelector?.value || "above";
     const symbolStyle = sizeTheme === "above-and-below"
         ? symbolStyleSelector?.value || "arrow"
         : "circle";
+    const colorScheme = getSelectedColorScheme();
+    const mappingKey = [field.name, sizeTheme, symbolStyle, colorScheme?.name || selectedColorRamp].join("|");
+    if (mappingKey === requestedMappingKey) {
+        return;
+    }
+
+    requestedMappingKey = mappingKey;
+    const updateId = ++mappingUpdateId;
 
     const params = {
         layer: biodiversityLayer,
         view: mapElement.view,
-        field: selectedSizeField.name,
+        field: field.name,
         theme: sizeTheme,
+        statistics: statisticsByField.get(field.name),
         symbolOptions: {
             symbolStyle
         },
         colorOptions: {
             isContinuous: true,
-            colorScheme: getSelectedColorScheme()
+            colorScheme
         }
     };
 
-    const { renderer } = await univariateColorSizeRendererCreator.createContinuousRenderer(params);
+    try {
+        const { renderer, statistics } = await univariateColorSizeRendererCreator.createContinuousRenderer(params);
+        if (updateId !== mappingUpdateId) {
+            return;
+        }
 
-    biodiversityLayer.renderer = renderer;
+        statisticsByField.set(field.name, statistics);
+        biodiversityLayer.renderer = renderer;
+    } catch (error) {
+        if (updateId === mappingUpdateId) {
+            requestedMappingKey = "";
+        }
+        throw error;
+    }
 }
 
 extractNumericalFields();
@@ -519,9 +540,6 @@ async function highlightSimilarFeatures() {
 
         let statistics = statisticsByField.get(field.name);
         if (!statistics) {
-            const [univariateColorSizeRendererCreator] = await $arcgis.import([
-                "@arcgis/core/smartMapping/renderers/univariateColorSize.js"
-            ]);
             const result = await univariateColorSizeRendererCreator.createContinuousRenderer({
                 layer: biodiversityLayer,
                 view,
@@ -553,25 +571,43 @@ async function highlightSimilarFeatures() {
 //  Chart setup
 //////////////////////////////////////////////////////
 
-const [{ createModel }] = await $arcgis.import(["@arcgis/charts-components"]);
+let chartInitializationPromise;
 
-chartElement.model = await createModel({
-    layer: biodiversityLayer,
-    config: biodiversityLayer.charts[0]
-});
+async function initializeChart() {
+    if (chartInitializationPromise) {
+        return chartInitializationPromise;
+    }
 
-chartElement.model.hideEmptyRowsAndColumns = true;
-chartElement.view = view;
-chartElement.layer = biodiversityLayer;
+    chartInitializationPromise = (async () => {
+        const [{ createModel }] = await $arcgis.import(["@arcgis/charts-components"]);
+        chartElement.model = await createModel({
+            layer: biodiversityLayer,
+            config: biodiversityLayer.charts[0]
+        });
+        chartElement.model.hideEmptyRowsAndColumns = true;
+        chartElement.view = view;
+        chartElement.layer = biodiversityLayer;
 
-await chartActionBar.componentOnReady?.();
-await new Promise((resolve) => requestAnimationFrame(resolve));
-const calciteChartActionBar = chartActionBar.shadowRoot?.querySelector("calcite-action-bar");
-await calciteChartActionBar?.componentOnReady?.();
-const chartActionBarContainer = calciteChartActionBar?.shadowRoot?.querySelector(".container");
-if (chartActionBarContainer) {
-    chartActionBarContainer.style.overflowY = "hidden";
+        await chartActionBar.componentOnReady?.();
+        await new Promise((resolve) => requestAnimationFrame(resolve));
+        const calciteChartActionBar = chartActionBar.shadowRoot?.querySelector("calcite-action-bar");
+        await calciteChartActionBar?.componentOnReady?.();
+        const chartActionBarContainer = calciteChartActionBar?.shadowRoot?.querySelector(".container");
+        if (chartActionBarContainer) {
+            chartActionBarContainer.style.overflowY = "hidden";
+        }
+    })();
+
+    return chartInitializationPromise;
 }
+
+sharedTabs?.addEventListener("calciteTabChange", () => {
+    requestAnimationFrame(() => {
+        if (chartTabTitle?.selected) {
+            initializeChart().catch((error) => console.error("Unable to initialize chart", error));
+        }
+    });
+});
 
 
 //////////////////////////////////////////////////////

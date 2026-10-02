@@ -4,6 +4,7 @@ const statusChip = document.getElementById("status-chip");
 let statusChipLabel = statusChip ? statusChip.textContent.trim() : "";
 const statusTooltip = document.getElementById("status-tooltip");
 const sharedTabs = document.getElementById("shared-tabs");
+const chartTabTitle = sharedTabs?.querySelector('calcite-tab-title[value="chart"]');
 
 const shellPanelBottom = document.getElementById("shell-panel-bottom");
 const dialogEl = document.getElementById("dialog");
@@ -60,6 +61,9 @@ const biodiversityLayer = mapElement.map?.allLayers.find((layer) => {
 });
 
 await biodiversityLayer.load();
+const [univariateColorSizeRendererCreator] = await $arcgis.import([
+    "@arcgis/core/smartMapping/renderers/univariateColorSize.js"
+]);
 
 //////////////////////////////////////////////////////
 //  Smart mapping and field picker logic
@@ -76,6 +80,8 @@ const GRID_ID_FIELD = "Grid_ID";
 let numericalFields = [];
 let selectedSizeField = null;
 const statisticsByField = new Map();
+let mappingUpdateId = 0;
+let requestedMappingKey = "";
 
 
 function updateSelectionListVisibility() {
@@ -133,14 +139,14 @@ function updateSelectionListChip(field, item) {
         return;
     }
 
-    if (item){
+    if (item) {
         selectedValueBlock.expanded = true;
         selectedValueBlock.heading = `${field.alias}`;
     }
-   
-    const itemValue = item?.graphic?.getAttribute(field.name);       
+
+    const itemValue = item?.graphic?.getAttribute(field.name);
     selectionVariableChip.textContent = item ? `${itemValue}` : "";
-    
+
 }
 
 
@@ -270,28 +276,44 @@ async function applyMapping() {
         return;
     }
 
-    const [univariateColorSizeRendererCreator] = await $arcgis.import([
-        "@arcgis/core/smartMapping/renderers/univariateColorSize.js"
-    ]);
-
+    const field = selectedSizeField;
     const sizeTheme = sizeThemeSelector?.value || "above";
     const symbolStyle = sizeTheme === "above-and-below"
         ? symbolStyleSelector?.value || "arrow"
         : "circle";
+    const mappingKey = [field.name, sizeTheme, symbolStyle].join("|");
+    if (mappingKey === requestedMappingKey) {
+        return;
+    }
+
+    requestedMappingKey = mappingKey;
+    const updateId = ++mappingUpdateId;
 
     const params = {
         layer: biodiversityLayer,
         view: mapElement.view,
-        field: selectedSizeField.name,
+        field: field.name,
         theme: sizeTheme,
+        statistics: statisticsByField.get(field.name),
         symbolOptions: {
             symbolStyle
         }
     };
 
-    const { renderer } = await univariateColorSizeRendererCreator.createContinuousRenderer(params);
+    try {
+        const { renderer, statistics } = await univariateColorSizeRendererCreator.createContinuousRenderer(params);
+        if (updateId !== mappingUpdateId) {
+            return;
+        }
 
-    biodiversityLayer.renderer = renderer;
+        statisticsByField.set(field.name, statistics);
+        biodiversityLayer.renderer = renderer;
+    } catch (error) {
+        if (updateId === mappingUpdateId) {
+            requestedMappingKey = "";
+        }
+        throw error;
+    }
 }
 
 extractNumericalFields();
@@ -334,9 +356,6 @@ async function highlightSimilarFeatures() {
 
         let statistics = statisticsByField.get(field.name);
         if (!statistics) {
-            const [univariateColorSizeRendererCreator] = await $arcgis.import([
-                "@arcgis/core/smartMapping/renderers/univariateColorSize.js"
-            ]);
             const result = await univariateColorSizeRendererCreator.createContinuousRenderer({
                 layer: biodiversityLayer,
                 view,
@@ -368,16 +387,34 @@ async function highlightSimilarFeatures() {
 //  Chart setup
 //////////////////////////////////////////////////////
 
-const [{ createModel }] = await $arcgis.import(["@arcgis/charts-components"]);
+let chartInitializationPromise;
 
-chartElement.model = await createModel({
-    layer: biodiversityLayer,
-    config: biodiversityLayer.charts[0]
+async function initializeChart() {
+    if (chartInitializationPromise) {
+        return chartInitializationPromise;
+    }
+
+    chartInitializationPromise = (async () => {
+        const [{ createModel }] = await $arcgis.import(["@arcgis/charts-components"]);
+        chartElement.model = await createModel({
+            layer: biodiversityLayer,
+            config: biodiversityLayer.charts[0]
+        });
+        chartElement.model.hideEmptyRowsAndColumns = true;
+        chartElement.view = view;
+        chartElement.layer = biodiversityLayer;
+    })();
+
+    return chartInitializationPromise;
+}
+
+sharedTabs?.addEventListener("calciteTabChange", () => {
+    requestAnimationFrame(() => {
+        if (chartTabTitle?.selected) {
+            initializeChart().catch((error) => console.error("Unable to initialize chart", error));
+        }
+    });
 });
-
-chartElement.model.hideEmptyRowsAndColumns = true;
-chartElement.view = view;
-chartElement.layer = biodiversityLayer;
 
 
 //////////////////////////////////////////////////////
