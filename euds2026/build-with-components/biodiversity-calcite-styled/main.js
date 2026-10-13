@@ -30,7 +30,7 @@ const saveErrorAlert = document.getElementById("save-error-alert");
 const saveErrorMessage = document.getElementById("save-error-message");
 const galleryAction = document.getElementById("gallery-action");
 const selectedAttributeChip = document.getElementById("selected-attribute-chip");
-const selectionVariableChip = document.getElementById("selection-variable-chip");
+const selectedHexagonChip = document.getElementById("selected-hexagon-chip");
 const popupElement = document.getElementById("popup");
 const similarFeaturesAction = document.getElementById("similar-features-action");
 const selectionList = document.getElementById("selection-list");
@@ -115,9 +115,7 @@ init();
 
 await mapElement.viewOnReady();
 const view = mapElement.view;
-
-view.selectionManager.on("selection-change", updateSelectionListVisibility);
-updateSelectionListVisibility();
+let selectedSizeField = null;
 
 const {
     portalItem
@@ -141,6 +139,36 @@ const [colorSchemes, symbolUtils, univariateColorSizeRendererCreator] = await $a
 ]);
 
 //////////////////////////////////////////////////////
+//  Selection list and selected hexagon
+//////////////////////////////////////////////////////
+
+function updateSelectionListVisibility(event) {
+    selectionList.hidden = !view.selectionManager.hasSelection;
+    selectedValueBlock.expanded = view.selectionManager.hasSelection;
+
+    if (event?.changes[0]?.removed?.length > 0) {
+        selectedHexagonChip.textContent = "";
+        selectedValueBlock.heading = "";
+        selectedHexagonChip.closed = true;
+    }
+}
+
+function updateSelectedHexagonChip(field, event) {
+    if (event?.item && field) {
+        selectedValueBlock.expanded = true;
+        selectedValueBlock.heading = `${field.alias}`;
+        const itemValue = event.item.graphic?.getAttribute(field.name);
+        selectedHexagonChip.closed = false;
+        selectedHexagonChip.textContent = `${itemValue}`;
+        return;
+    }
+}
+
+selectionList.afterListItemSelect = (event) => updateSelectedHexagonChip(selectedSizeField, event);
+view.selectionManager.on("selection-change", updateSelectionListVisibility);
+updateSelectionListVisibility();
+
+//////////////////////////////////////////////////////
 //  Smart mapping and field picker logic
 //////////////////////////////////////////////////////
 
@@ -152,15 +180,11 @@ const featureTable = document.querySelector("arcgis-feature-table");
 const GRID_ID_FIELD = "Grid_ID";
 
 let numericalFields = [];
-let selectedSizeField = null;
 const statisticsByField = new Map();
 let mappingUpdateId = 0;
 let requestedMappingKey = "";
 
 
-function updateSelectionListVisibility() {
-    selectionList.hidden = !view.selectionManager.hasSelection;
-}
 function extractNumericalFields() {
     numericalFields = [];
 
@@ -207,23 +231,6 @@ async function populateAttributeLists() {
         sizeValuePicker.items = items;
     });
 }
-
-function updateSelectionListChip(field, item) {
-    if (!field) {
-        return;
-    }
-
-    if (item) {
-        selectedValueBlock.expanded = true;
-        selectedValueBlock.heading = `${field.alias}`;
-    }
-
-    const itemValue = item?.graphic?.getAttribute(field.name);
-    selectionVariableChip.textContent = item ? `${itemValue}` : "";
-
-}
-
-
 
 function updateSelectedAttributeChip(field) {
     if (selectedAttributeChip && field) {
@@ -353,7 +360,7 @@ function initializeFromExistingRenderer() {
     if (initialField && sizeValuePicker) {
         selectedSizeField = initialField;
         updateSelectedAttributeChip(initialField);
-        updateSelectionListChip(initialField, null);
+        updateSelectedHexagonChip(initialField, null);
         sizeValuePicker.currentValue = {
             value: initialField.name,
             label: initialField.alias
@@ -379,7 +386,7 @@ function wireUpEvents() {
             }
 
             updateSelectedAttributeChip(field);
-            updateSelectionListChip(field, null);
+            updateSelectedHexagonChip(field, null);
 
             if (selectedSizeField && selected.value === selectedSizeField.name) {
                 return;
@@ -760,7 +767,6 @@ function init() {
         const ro = new ResizeObserver(() => handleResponsiveLayout());
         ro.observe(shellPanelBottom);
     }
-    selectionList.afterListItemSelect = (ev) => updateSelectionListChip(selectedSizeField, ev.item);
     window.addEventListener("resize", () => {
         mapConfigurationHeightFrozen = false;
         handleResponsiveLayout();

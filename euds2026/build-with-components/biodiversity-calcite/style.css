@@ -109,6 +109,6 @@ arcgis-chart {
     margin-bottom: var(--calcite-spacing-lg);
 }
 
-#selection-variable-chip {
+#selected-hexagon-chip {
     --calcite-chip-background-color: lightblue;
 }
