@@ -47,6 +47,11 @@
                 <arcgis-legend></arcgis-legend>
             </arcgis-expand>
             <arcgis-search slot="top-right"></arcgis-search>
+            <calcite-fab id="toggle-code" slot="bottom-left" icon="code" text="Code snippets" kind="neutral"
+                scale="m"></calcite-fab>
+            <calcite-tooltip reference-element="toggle-code" placement="right" close-on-click>
+                Code snippets for this app
+            </calcite-tooltip>
             <arcgis-popup id="popup" slot="popup" include-default-actions-disabled>
                 <calcite-action id="similar-features-action" slot="actions-start" icon="filter" text="Show similar"
                     text-enabled></calcite-action>
@@ -147,7 +152,7 @@
                     <calcite-tab id="selection-tab">
                         <div class="selection-tab-layout">
                             <calcite-block id="SelectedValueBlock" collapsed>
-                                <calcite-chip id="selected-hexagon-chip" kind="inverse"> fieldname </calcite-chip>
+                                <calcite-chip id="selection-variable-chip" kind="inverse"> fieldname </calcite-chip>
                             </calcite-block>
                             <arcgis-selection-toolbar reference-element="map"></arcgis-selection-toolbar>
                             <arcgis-selection-list display-mode="feature" hidden id="selection-list" hide-menu
@@ -157,6 +162,18 @@
                     </calcite-tab>
                 </calcite-tabs>
             </calcite-shell>
+        </calcite-dialog>
+        <calcite-dialog modal heading="Biodiversity and Conservation - Code" id="code-dialog" width="l" slot="dialogs">
+            <div class="code-dialog-content">
+                <calcite-tabs>
+                    <calcite-tab-nav slot="title-group">
+                        <calcite-tab-title selected>Apply smart mapping</calcite-tab-title>
+                    </calcite-tab-nav>
+                    <calcite-tab selected>
+                        <arcgis-code-editor id="code-snippets" language="javascript"></arcgis-code-editor>
+                    </calcite-tab>
+                </calcite-tabs>
+            </div>
         </calcite-dialog>
         <calcite-alert id="save-alert" slot="alerts" icon="smile" kind="success" label="Web map saved" auto-close
             auto-close-duration="slow">
