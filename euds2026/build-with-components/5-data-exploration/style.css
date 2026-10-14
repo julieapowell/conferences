@@ -6,10 +6,6 @@ calcite-shell {
     block-size: 100%;
 }
 
-.warning-chip {
-    --calcite-icon-color: var(--calcite-color-status-warning);
-}
-
 calcite-tab-title calcite-chip {
     margin-inline-start: 0.5rem;
 }
@@ -91,11 +87,6 @@ calcite-notice {
     display: flex;
     visibility: hidden;
     pointer-events: none;
-}
-
-#status-chip {
-    margin: 0 0.5rem;
-    align-self: center;
 }
 
 calcite-tab-title[selected] {
@@ -246,12 +237,6 @@ arcgis-chart {
 
 #similar-features-action {
     --calcite-icon-color: var(--calcite-color-status-warning);
-}
-
-/* Field selector styling */
-.field-selector-wrapper {
-    position: relative;
-    margin-bottom: var(--calcite-spacing-lg);
 }
 
 #selection-variable-chip {

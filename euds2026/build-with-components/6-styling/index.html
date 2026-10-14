@@ -35,12 +35,12 @@
             <calcite-chip kind="brand" slot="content-start" id="selected-attribute-chip" label="Selected attribute">
                 Threatened Species Richness Mean
             </calcite-chip>
-            <calcite-navigation-user id="navigation-user" slot="user"></calcite-navigation-user>
+            <calcite-navigation-user id="navigation-user" slot="user" hidden></calcite-navigation-user>
             <calcite-action slot="content-end" icon="save" scale="l" text="Save new webmap" id="save"></calcite-action>
         </calcite-navigation>
         <arcgis-map item-id="5904891c2ee54113af7c8f1ee0550569" id="map">
             <arcgis-zoom slot="top-left"></arcgis-zoom>
-            <arcgis-expand slot="top-left">
+            <arcgis-expand slot="top-left" group="top-left">
                 <arcgis-bookmarks></arcgis-bookmarks>
             </arcgis-expand>
             <arcgis-expand slot="top-left" expand-tooltip="Legend">

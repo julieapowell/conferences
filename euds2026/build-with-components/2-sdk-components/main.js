@@ -1,32 +1,54 @@
-const mapEl = document.querySelector("arcgis-map");
-const panelBottom = document.getElementById("panel-bottom");
-const statusChip = document.getElementById("status-chip");
-const statusChipLabel = statusChip ? statusChip.textContent.trim() : "";
-const statusTooltip = document.getElementById("status-tooltip");
-const sheetToggleEl = document.getElementById("sheet-toggle");
-const sheetEl = document.getElementById("sheet");
-const tabTitleEls = document.querySelectorAll("#shell-panel-bottom calcite-tab-title, #dialog calcite-tab-title");
-const tabsEls = document.querySelectorAll("#shell-panel-bottom calcite-tabs, #dialog calcite-tabs");
-const listItemEls = document.querySelectorAll("#sheet calcite-list-item");
-
+const mapElement = document.querySelector("arcgis-map");
+const navigationUser = document.getElementById("navigation-user");
+const sharedTabs = document.getElementById("shared-tabs");
 const shellPanelBottom = document.getElementById("shell-panel-bottom");
 const dialogEl = document.getElementById("dialog");
+const panelTabsHost = document.getElementById("panel-tabs-host");
+const dialogTabsHost = document.getElementById("dialog-tabs-host");
 const popOutAction = document.getElementById("pop-out");
 const dockAction = document.getElementById("dock");
 
 const BREAKPOINT_SMALL = 800;
 
+async function populateNavigationUser(portal) {
+    if (!navigationUser || !portal) {
+        return;
+    }
+
+    await portal.load();
+    const user = portal.user;
+    if (!user) {
+        return;
+    }
+
+    navigationUser.fullName = user.fullName || user.username;
+    navigationUser.username = user.username;
+    navigationUser.userId = user.username;
+    navigationUser.hidden = false;
+}
+
+function moveTabsTo(host) {
+    if (host && sharedTabs.parentElement !== host) {
+        host.prepend(sharedTabs);
+    }
+}
+
+function openDataExplorerDialog() {
+    const refreshLayout = sharedTabs.parentElement !== dialogTabsHost && dialogEl.open;
+    moveTabsTo(dialogTabsHost);
+
+    if (refreshLayout) {
+        dialogEl.open = false;
+        setTimeout(() => {
+            dialogEl.open = true;
+        }, 0);
+        return;
+    }
+
+    dialogEl.open = true;
+}
+
 function init() {
-    sheetToggleEl.addEventListener("click", () => handleSheetOpen());
-
-    listItemEls.forEach((el) => {
-        el.addEventListener("calciteListItemSelect", (event) => handleListSelect(event));
-    });
-
-    tabsEls.forEach((el) => {
-        el.addEventListener("calciteTabsActivate", (event) => handleTabSelect(event));
-    });
-
     if (popOutAction && dockAction && shellPanelBottom && dialogEl) {
         popOutAction.addEventListener("click", () => {
             const isSmall = window.innerWidth <= BREAKPOINT_SMALL;
@@ -34,12 +56,13 @@ function init() {
                 return;
             }
             shellPanelBottom.hidden = true;
-            dialogEl.open = true;
+            openDataExplorerDialog();
         });
 
         dockAction.addEventListener("click", () => {
             dialogEl.open = false;
             shellPanelBottom.hidden = false;
+            moveTabsTo(panelTabsHost);
             popOutAction.setFocus();
         });
     }
@@ -54,46 +77,6 @@ function init() {
     handleResponsiveLayout();
 }
 
-function handleSheetOpen() {
-    sheetEl.open = true;
-    panelBottom.collapsed = false;
-}
-
-function handleListSelect(event) {
-    const selectedItem = event.target;
-    const value = selectedItem.getAttribute("value");
-    if (!value) {
-        return;
-    }
-    sheetEl.open = false;
-
-    listItemEls.forEach((item) => {
-        item.selected = item === selectedItem;
-    });
-
-    tabTitleEls.forEach((tabTitle) => {
-        tabTitle.selected = tabTitle.getAttribute("value") === value;
-    });
-}
-
-function handleTabSelect(event) {
-    const tabs = event.currentTarget;
-    const selectedTitle = tabs.querySelector("calcite-tab-title[selected]");
-    const value = selectedTitle ? selectedTitle.getAttribute("value") : null;
-    if (!value) {
-        return;
-    }
-    sheetEl.open = false;
-
-    tabTitleEls.forEach((tabTitle) => {
-        tabTitle.selected = tabTitle.getAttribute("value") === value;
-    });
-
-    listItemEls.forEach((item) => {
-        item.selected = item.getAttribute("value") === value;
-    });
-}
-
 function handleResponsiveLayout() {
     if (!shellPanelBottom || !dialogEl) {
         return;
@@ -104,35 +87,25 @@ function handleResponsiveLayout() {
     if (isSmall) {
         shellPanelBottom.hidden = false;
         dialogEl.open = false;
+        moveTabsTo(panelTabsHost);
         if (popOutAction) {
             popOutAction.hidden = true;
         }
-        if (statusChip) {
-            statusChip.textContent = "";
-            statusChip.setAttribute("interactive", "");
-        }
-        if (statusTooltip) {
-            statusTooltip.hidden = false;
-            statusTooltip.setAttribute("reference-element", "status-chip");
-        }
     } else {
-        if (dialogEl.open) {
+        if (dialogEl.open || dialogEl.hasAttribute("open")) {
             shellPanelBottom.hidden = true;
+            openDataExplorerDialog();
         } else {
             shellPanelBottom.hidden = false;
+            moveTabsTo(panelTabsHost);
         }
         if (popOutAction) {
             popOutAction.hidden = false;
-        }
-        if (statusChip) {
-            statusChip.textContent = statusChipLabel;
-            statusChip.removeAttribute("interactive");
-        }
-        if (statusTooltip) {
-            statusTooltip.hidden = true;
-            statusTooltip.removeAttribute("reference-element");
         }
     }
 }
 
 init();
+mapElement.viewOnReady()
+    .then(() => populateNavigationUser(mapElement.map?.portalItem?.portal))
+    .catch((error) => console.warn("Unable to display the signed-in user", error));

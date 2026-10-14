@@ -105,6 +105,7 @@ async function populateNavigationUser(portal) {
     navigationUser.username = user.username;
     navigationUser.userId = user.username;
     navigationUser.textDisabled = false;
+    navigationUser.hidden = false;
 }
 
 const BREAKPOINT_SMALL = 800;

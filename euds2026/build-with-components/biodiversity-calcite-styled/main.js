@@ -1,9 +1,4 @@
 const mapElement = document.querySelector("arcgis-map");
-const chartElement = document.querySelector("arcgis-chart");
-const chartActionBar = document.querySelector("arcgis-charts-action-bar");
-const statusChip = document.getElementById("status-chip");
-let statusChipLabel = statusChip ? statusChip.textContent.trim() : "";
-const statusTooltip = document.getElementById("status-tooltip");
 const sharedTabs = document.getElementById("shared-tabs");
 const mapConfigurationTab = document.getElementById("map-configuration-tab");
 const mapConfigurationBlocks = document.getElementById("map-configuration-blocks");
@@ -11,8 +6,6 @@ const symbolStyleBlock = document.getElementById("symbol-style-block");
 const colorRampAction = document.getElementById("color-ramp-action");
 const colorRampPopover = document.getElementById("color-ramp-popover");
 const colorRampList = document.getElementById("color-ramp-list");
-const chartTabTitle = sharedTabs?.querySelector('calcite-tab-title[value="chart"]');
-
 const shellPanelBottom = document.getElementById("shell-panel-bottom");
 const dialogEl = document.getElementById("dialog");
 const panelTabsHost = document.getElementById("panel-tabs-host");
@@ -39,7 +32,6 @@ const toggleCodeAction = document.getElementById("toggle-code");
 const codeDialog = document.getElementById("code-dialog");
 const codeSnippets = document.getElementById("code-snippets");
 
-const SAVE_GROUP_TITLE = "Global Biodiversity and Conservation Maps";
 const GALLERY_PATH = "/apps/instant/gallery/index.html?appid=053eb0c7ab7345fca7bd43f94e4b9274&sortField=modified&sortOrder=desc&view=grid";
 const MAP_CONFIGURATION_HEIGHT_BUFFER = 86;
 const AUTOMATIC_RAMP_VALUE = "recommended-automatic";
@@ -105,6 +97,7 @@ async function populateNavigationUser(portal) {
     navigationUser.username = user.username;
     navigationUser.userId = user.username;
     navigationUser.textDisabled = false;
+    navigationUser.hidden = false;
 }
 
 const BREAKPOINT_SMALL = 800;
@@ -602,49 +595,6 @@ async function highlightSimilarFeatures() {
 }
 
 //////////////////////////////////////////////////////
-//  Chart setup
-//////////////////////////////////////////////////////
-
-/* let chartInitializationPromise;
-
-async function initializeChart() {
-    if (chartInitializationPromise) {
-        return chartInitializationPromise;
-    }
-
-    chartInitializationPromise = (async () => {
-        const [{ createModel }] = await $arcgis.import(["@arcgis/charts-components"]);
-        chartElement.model = await createModel({
-            layer: biodiversityLayer,
-            config: biodiversityLayer.charts[0]
-        });
-        chartElement.model.hideEmptyRowsAndColumns = true;
-        chartElement.view = view;
-        chartElement.layer = biodiversityLayer;
-
-        await chartActionBar.componentOnReady?.();
-        await new Promise((resolve) => requestAnimationFrame(resolve));
-        const calciteChartActionBar = chartActionBar.shadowRoot?.querySelector("calcite-action-bar");
-        await calciteChartActionBar?.componentOnReady?.();
-        const chartActionBarContainer = calciteChartActionBar?.shadowRoot?.querySelector(".container");
-        if (chartActionBarContainer) {
-            chartActionBarContainer.style.overflowY = "hidden";
-        }
-    })();
-
-    return chartInitializationPromise;
-}
-
-sharedTabs?.addEventListener("calciteTabChange", () => {
-    requestAnimationFrame(() => {
-        if (chartTabTitle?.selected) {
-            initializeChart().catch((error) => console.error("Unable to initialize chart", error));
-        }
-    });
-}); */
-
-
-//////////////////////////////////////////////////////
 //  Save the web map
 //////////////////////////////////////////////////////
 
@@ -686,13 +636,6 @@ async function handleSaveClick() {
 
     try {
         const savedItem = await saveWebMap();
-        if (statusChip) {
-            statusChip.icon = "check-circle-f";
-            statusChip.classList.remove("warning-chip");
-            statusChipLabel = "Saved";
-            statusChip.textContent = statusChipLabel;
-        }
-
         saveAlertLink.href = savedItem.itemPageUrl;
         saveAlertLink.textContent = savedItem.title;
         saveAlert.open = true;
@@ -818,14 +761,6 @@ function handleResponsiveLayout() {
         if (popOutAction) {
             popOutAction.hidden = true;
         }
-        if (statusChip) {
-            statusChip.textContent = "";
-            statusChip.setAttribute("interactive", "");
-        }
-        if (statusTooltip) {
-            statusTooltip.hidden = false;
-            statusTooltip.setAttribute("reference-element", "status-chip");
-        }
     } else {
         if (dialogEl.open || dialogEl.hasAttribute("open")) {
             shellPanelBottom.hidden = true;
@@ -836,14 +771,6 @@ function handleResponsiveLayout() {
         }
         if (popOutAction) {
             popOutAction.hidden = false;
-        }
-        if (statusChip) {
-            statusChip.textContent = statusChipLabel;
-            statusChip.removeAttribute("interactive");
-        }
-        if (statusTooltip) {
-            statusTooltip.hidden = true;
-            statusTooltip.removeAttribute("reference-element");
         }
     }
 }

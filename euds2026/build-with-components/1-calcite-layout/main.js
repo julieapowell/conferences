@@ -1,4 +1,22 @@
 const mapEl = document.querySelector("arcgis-map");
+const navigationUser = document.getElementById("navigation-user");
+
+async function populateNavigationUser(portal) {
+    if (!navigationUser || !portal) {
+        return;
+    }
+
+    await portal.load();
+    const user = portal.user;
+    if (!user) {
+        return;
+    }
+
+    navigationUser.fullName = user.fullName || user.username;
+    navigationUser.username = user.username;
+    navigationUser.userId = user.username;
+    navigationUser.hidden = false;
+}
 const panelBottom = document.getElementById("panel-bottom");
 const statusChip = document.getElementById("status-chip");
 const statusChipLabel = statusChip ? statusChip.textContent.trim() : "";
@@ -136,3 +154,6 @@ function handleResponsiveLayout() {
 }
 
 init();
+mapEl.viewOnReady()
+    .then(() => populateNavigationUser(mapEl.map?.portalItem?.portal))
+    .catch((error) => console.warn("Unable to display the signed-in user", error));
