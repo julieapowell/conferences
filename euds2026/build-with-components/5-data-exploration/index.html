@@ -1,0 +1,240 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <script type="module" blocking="render" src="https://js.arcgis.com/5.2.0-next/"></script>
+
+    <!-- Application Styles -->
+    <link rel="stylesheet" href="style.css" />
+    <script type="module">
+        const [config, idMgr, OAuthInfo] = await $arcgis.import([
+            "@arcgis/core/config.js",
+            "@arcgis/core/identity/IdentityManager.js",
+            "@arcgis/core/identity/OAuthInfo.js",
+        ]);
+
+        const oAuthInfo = new OAuthInfo({
+            appId: "No2Lhym7wqkgUyOG",
+        });
+        idMgr.registerOAuthInfos([oAuthInfo]); 
+    </script>
+</head>
+
+<body>
+    <calcite-shell>
+        <calcite-navigation slot="header">
+            <calcite-navigation-logo icon="footprint" heading="Biodiversity and Conservation" alt="Application logo"
+                slot="logo">
+            </calcite-navigation-logo>
+            <calcite-chip kind="brand" slot="content-start" id="selected-attribute-chip" label="selected attribute">
+                Threatened Species Richness Mean
+            </calcite-chip>
+            <calcite-navigation-user slot="user"></calcite-navigation-user>
+            <calcite-action slot="content-end" icon="save" scale="l" text="Save new webmap" id="save"></calcite-action>
+        </calcite-navigation>
+        <arcgis-map item-id="5904891c2ee54113af7c8f1ee0550569" id="map">
+            <arcgis-zoom slot="top-left"></arcgis-zoom>
+            <arcgis-expand slot="top-left">
+                <arcgis-bookmarks></arcgis-bookmarks>
+            </arcgis-expand>
+            <arcgis-expand slot="top-left" expand-tooltip="Legend">
+                <arcgis-legend></arcgis-legend>
+            </arcgis-expand>
+            <arcgis-search slot="top-right"></arcgis-search>
+            <calcite-fab id="toggle-code" slot="bottom-left" icon="code" text="Code snippets" kind="neutral"
+                scale="m"></calcite-fab>
+            <calcite-tooltip reference-element="toggle-code" placement="right" close-on-click>
+                Code snippets for this app
+            </calcite-tooltip>
+            <arcgis-popup id="popup" slot="popup" include-default-actions-disabled>
+                <calcite-action id="similar-features-action" slot="actions-start" icon="filter" text="Show similar"
+                    text-enabled></calcite-action>
+            </arcgis-popup>
+        </arcgis-map>
+        <calcite-shell-panel slot="panel-end" id="shell-panel-bottom" resizable hidden>
+            <calcite-panel id="panel-bottom" heading="Data Explorer">
+                <calcite-action icon="minimize" text="Pop out" slot="header-actions-end" id="pop-out"></calcite-action>
+                <calcite-shell class="panel-shell" id="panel-tabs-host">
+                </calcite-shell>
+            </calcite-panel>
+        </calcite-shell-panel>
+        <calcite-dialog id="dialog" heading="Data Explorer" close-disabled placement="bottom-end" drag-enabled
+            fullscreen-disabled resizable open width="s" slot="dialogs">
+            <calcite-action icon="minus" text="Minimize" slot="header-actions-end"
+                id="minimize-dialog"></calcite-action>
+            <calcite-action icon="dock-bottom" text="Dock" slot="header-actions-end" id="dock"></calcite-action>
+            <calcite-shell class="panel-shell" id="dialog-tabs-host">
+                <calcite-tabs id="shared-tabs">
+                    <calcite-tab-nav slot="title-group">
+                        <calcite-tab-title icon-start="link-chart" selected value="field-chart">
+                            Map configuration
+                        </calcite-tab-title>
+                        <calcite-tab-title value="table" icon-start="table">
+                            Table
+                        </calcite-tab-title>
+                        <calcite-tab-title icon-start="graph-bar" value="chart">
+                            Scatter plot
+                        </calcite-tab-title>
+                        <calcite-tab-title icon-start="selection" value="selection">
+                            Selection
+                        </calcite-tab-title>
+                    </calcite-tab-nav>
+                    <calcite-tab id="map-configuration-tab" selected>
+                        <calcite-notice open icon>
+                            <span slot="message">What field do you want to map?</span>
+                        </calcite-notice>
+                        <calcite-block-group id="map-configuration-blocks" label="Map configuration controls"
+                            expand-mode="multiple">
+                            <calcite-block expanded heading="Available fields">
+                                <arcgis-value-picker>
+                                    <arcgis-value-picker-combobox id="size-attribute-picker"
+                                        label="Size attribute"></arcgis-value-picker-combobox>
+                                </arcgis-value-picker>
+                            </calcite-block>
+                            <!-- Size Theme Selection -->
+                            <calcite-block expanded heading="Size Theme">
+                                <calcite-segmented-control id="size-theme-selector" width="full" appearance="outline">
+                                    <calcite-segmented-control-item value="above"
+                                        checked>Above</calcite-segmented-control-item>
+                                    <calcite-segmented-control-item value="below">Below</calcite-segmented-control-item>
+                                    <calcite-segmented-control-item
+                                        value="above-and-below">Above/Below</calcite-segmented-control-item>
+                                </calcite-segmented-control>
+                            </calcite-block>
+                            <calcite-block id="symbol-style-block" expanded heading="Symbol style" hidden>
+                                <calcite-combobox id="symbol-style-selector" label="Symbol style"
+                                    selection-mode="single-persist" selection-display="single" clear-disabled>
+                                    <calcite-combobox-item value="caret" heading="Caret"></calcite-combobox-item>
+                                    <calcite-combobox-item value="circle-caret"
+                                        heading="Circle caret"></calcite-combobox-item>
+                                    <calcite-combobox-item value="arrow" heading="Arrow"
+                                        selected></calcite-combobox-item>
+                                    <calcite-combobox-item value="circle-arrow"
+                                        heading="Circle arrow"></calcite-combobox-item>
+                                    <calcite-combobox-item value="plus-minus"
+                                        heading="Plus/minus"></calcite-combobox-item>
+                                    <calcite-combobox-item value="circle-plus-minus"
+                                        heading="Circle plus/minus"></calcite-combobox-item>
+                                    <calcite-combobox-item value="square" heading="Square"></calcite-combobox-item>
+                                    <calcite-combobox-item value="circle" heading="Circle"></calcite-combobox-item>
+                                    <calcite-combobox-item value="triangle" heading="Triangle"></calcite-combobox-item>
+                                    <calcite-combobox-item value="happy-sad"
+                                        heading="Happy/sad"></calcite-combobox-item>
+                                    <calcite-combobox-item value="thumb" heading="Thumb"></calcite-combobox-item>
+                                </calcite-combobox>
+                            </calcite-block>
+                        </calcite-block-group>
+                        <calcite-action id="color-ramp-action" icon="palette" text="Choose color ramp"
+                            scale="l"></calcite-action>
+                        <calcite-popover id="color-ramp-popover" reference-element="color-ramp-action"
+                            label="Color ramps" placement="top-start" closable>
+                            <calcite-panel heading="Color ramp">
+                                <calcite-list id="color-ramp-list" label="Available color ramps"
+                                    selection-mode="single-persist"></calcite-list>
+                            </calcite-panel>
+                        </calcite-popover>
+                    </calcite-tab>
+                    <calcite-tab id="table-tab">
+                        <arcgis-feature-table reference-element="map" map-layer-id="1a06d698622-layer-5"
+                            sync-view-selection table-title="Threatened Species Richness"></arcgis-feature-table>
+                    </calcite-tab>
+                    <calcite-tab id="chart-tab">
+                        <arcgis-chart reference-element="map" map-layer-id="1a06d698622-layer-5" chart-index="0"
+                            sync-view-selection>
+                            <arcgis-charts-action-bar slot="action-bar"></arcgis-charts-action-bar>
+                        </arcgis-chart>
+                    </calcite-tab>
+                    <calcite-tab id="selection-tab">
+                        <div class="selection-tab-layout">
+                            <calcite-block id="SelectedValueBlock" collapsed>
+                                <calcite-chip id="selection-variable-chip" kind="inverse"> fieldname </calcite-chip>
+                            </calcite-block>
+                            <arcgis-selection-toolbar reference-element="map"></arcgis-selection-toolbar>
+                            <arcgis-selection-list display-mode="feature" hidden id="selection-list" hide-menu
+                                hide-layer-filter hide-header label="Selection List"
+                                reference-element="map"></arcgis-selection-list>
+                        </div>
+                    </calcite-tab>
+                </calcite-tabs>
+            </calcite-shell>
+        </calcite-dialog>
+        <calcite-dialog modal heading="Biodiversity and Conservation - Code" id="code-dialog" width="l" slot="dialogs">
+            <div class="code-dialog-content">
+                <calcite-tabs>
+                    <calcite-tab-nav slot="title-group">
+                        <calcite-tab-title selected>Value Picker</calcite-tab-title>
+                        <calcite-tab-title>Smart mapping</calcite-tab-title>
+                        <calcite-tab-title>Save webmap</calcite-tab-title>
+                    </calcite-tab-nav>
+                    <calcite-tab selected>
+                        <arcgis-code-editor id="value-picker-snippets" language="html" value='&lt;arcgis-value-picker&gt;
+    &lt;arcgis-value-picker-combobox id=&quot;size-attribute-picker&quot;
+        label=&quot;Size attribute&quot;&gt;&lt;/arcgis-value-picker-combobox&gt;
+&lt;/arcgis-value-picker&gt;'></arcgis-code-editor>
+                    </calcite-tab>
+                    <calcite-tab>
+                        <arcgis-code-editor id="smart-mapping-snippets" language="javascript" value='const params = {
+    layer: biodiversityLayer,
+    view: mapElement.view,
+    field: field.name,
+    theme: sizeTheme,
+    statistics: statisticsByField.get(field.name),
+    symbolOptions: {
+        symbolStyle
+    },
+    colorOptions: {
+        isContinuous: true,
+        colorScheme
+    }
+};
+
+const { renderer, statistics } = await univariateColorSizeRendererCreator.createContinuousRenderer(params);
+statisticsByField.set(field.name, statistics);
+biodiversityLayer.renderer = renderer;'></arcgis-code-editor>
+                    </calcite-tab>
+                    <calcite-tab>
+                        <arcgis-code-editor id="save-webmap-snippets" language="javascript" value='const attributeName = selectedSizeField?.alias ?? selectedSizeField?.name ?? &quot;&quot;;
+const webmap = mapElement.map;
+
+await webmap.updateFrom(mapElement.view);
+
+const savedItem = await webmap.saveAs({
+    portal,
+    title: `Biodiversity and Conservation - ${attributeName}`,
+    snippet: `Biodiversity and conservation hexagons mapped by ${attributeName}.`,
+    tags: [&quot;biodiversity&quot;, &quot;conservation&quot;, &quot;hexagons&quot;]
+});
+'></arcgis-code-editor>
+                    </calcite-tab>
+                </calcite-tabs>
+            </div>
+        </calcite-dialog>
+        <calcite-alert id="save-alert" slot="alerts" icon="smile" kind="success" label="Web map saved" auto-close
+            auto-close-duration="slow">
+            <div slot="title">Web map saved</div>
+            <div slot="message">
+                <calcite-link id="save-alert-link" target="_blank" rel="noopener"></calcite-link> was saved to the
+                Global Biodiversity and Conservation Maps group.
+            </div>
+            <calcite-action slot="actions-end" id="gallery-action" icon="apps" text="Open the gallery" text-enabled>
+            </calcite-action>
+        </calcite-alert>
+        <calcite-alert id="save-error-alert" slot="alerts" kind="danger" icon="exclamation-mark-triangle"
+            label="Web map not saved" auto-close auto-close-duration="slow">
+            <div slot="title">Unable to save the web map</div>
+            <div slot="message" id="save-error-message"></div>
+        </calcite-alert>
+    </calcite-shell>
+
+    <calcite-panel id="minimized-data-explorer" heading="Data Explorer" hidden>
+        <calcite-action id="restore-dialog" icon="chevron-up" text="Expand Data Explorer"
+            slot="header-actions-end"></calcite-action>
+    </calcite-panel>
+
+    <!-- Application Script -->
+    <script type="module" src="main.js?v=style-performance"></script>
+</body>
+
+</html>

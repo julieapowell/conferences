@@ -594,40 +594,6 @@ async function highlightSimilarFeatures() {
 }
 
 //////////////////////////////////////////////////////
-//  Chart setup
-//////////////////////////////////////////////////////
-
-let chartInitializationPromise;
-
-async function initializeChart() {
-    if (chartInitializationPromise) {
-        return chartInitializationPromise;
-    }
-
-    chartInitializationPromise = (async () => {
-        const [{ createModel }] = await $arcgis.import(["@arcgis/charts-components"]);
-        chartElement.model = await createModel({
-            layer: biodiversityLayer,
-            config: biodiversityLayer.charts[0]
-        });
-        chartElement.model.hideEmptyRowsAndColumns = true;
-        chartElement.view = view;
-        chartElement.layer = biodiversityLayer;
-    })();
-
-    return chartInitializationPromise;
-}
-
-sharedTabs?.addEventListener("calciteTabChange", () => {
-    requestAnimationFrame(() => {
-        if (chartTabTitle?.selected) {
-            initializeChart().catch((error) => console.error("Unable to initialize chart", error));
-        }
-    });
-});
-
-
-//////////////////////////////////////////////////////
 //  Save the web map
 //////////////////////////////////////////////////////
 
@@ -647,14 +613,6 @@ async function saveWebMap() {
         snippet: `Biodiversity and conservation hexagons mapped by ${attributeName}.`,
         tags: ["biodiversity", "conservation", "hexagons"]
     });
-
-    // The item exists at this point, so thumbnail and sharing failures must not fail the save.
-    try {
-        const screenshot = await mapElement.takeScreenshot({ width: 600, height: 400 });
-        await savedItem.updateThumbnail({ thumbnail: screenshot.dataUrl, filename: "thumbnail.png" });
-    } catch (error) {
-        console.warn("Unable to store the web map thumbnail", error);
-    }
 
     try {
         await portal.request(`${savedItem.userItemUrl}/share`, {
@@ -817,7 +775,7 @@ function handleResponsiveLayout() {
             statusTooltip.setAttribute("reference-element", "status-chip");
         }
     } else {
-        if (dialogEl.open) {
+        if (dialogEl.open || dialogEl.hasAttribute("open")) {
             lockTabsToMapConfigurationHeight();
             shellPanelBottom.hidden = true;
             openDataExplorerDialog();
