@@ -40,11 +40,18 @@
         </calcite-navigation>
         <arcgis-map item-id="5904891c2ee54113af7c8f1ee0550569" id="map">
             <arcgis-zoom slot="top-left"></arcgis-zoom>
-            <arcgis-home slot="top-left"></arcgis-home>
             <arcgis-expand slot="top-left">
                 <arcgis-bookmarks></arcgis-bookmarks>
             </arcgis-expand>
+            <arcgis-expand slot="top-left" expand-tooltip="Legend">
+                <arcgis-legend></arcgis-legend>
+            </arcgis-expand>
             <arcgis-search slot="top-right"></arcgis-search>
+            <calcite-fab id="toggle-code" slot="bottom-left" icon="code" text="Code snippets" kind="neutral"
+                scale="m"></calcite-fab>
+            <calcite-tooltip reference-element="toggle-code" placement="right" close-on-click>
+                Code snippets for this app
+            </calcite-tooltip>
             <arcgis-popup id="popup" slot="popup" include-default-actions-disabled>
                 <calcite-action id="similar-features-action" slot="actions-start" icon="filter" text="Show similar"
                     text-enabled></calcite-action>
@@ -59,6 +66,8 @@
         </calcite-shell-panel>
         <calcite-dialog id="dialog" heading="Data Explorer" close-disabled placement="bottom-end" drag-enabled
             fullscreen-disabled resizable open width="s" slot="dialogs">
+            <calcite-action icon="minus" text="Minimize" slot="header-actions-end"
+                id="minimize-dialog"></calcite-action>
             <calcite-action icon="dock-bottom" text="Dock" slot="header-actions-end" id="dock"></calcite-action>
             <calcite-shell class="panel-shell" id="dialog-tabs-host">
                 <calcite-tabs id="shared-tabs">
@@ -76,7 +85,7 @@
                             Selection
                         </calcite-tab-title>
                     </calcite-tab-nav>
-                    <calcite-tab selected>
+                    <calcite-tab id="map-configuration-tab" selected>
                         <calcite-notice open icon>
                             <span slot="message">What field do you want to map?</span>
                         </calcite-notice>
@@ -120,32 +129,51 @@
                                     <calcite-combobox-item value="thumb" heading="Thumb"></calcite-combobox-item>
                                 </calcite-combobox>
                             </calcite-block>
-                            <calcite-block expanded heading="Legend">
-                                <arcgis-legend reference-element="map">
-                                </arcgis-legend>
-                            </calcite-block>
                         </calcite-block-group>
+                        <calcite-action id="color-ramp-action" icon="palette" text="Choose color ramp"
+                            scale="l"></calcite-action>
+                        <calcite-popover id="color-ramp-popover" reference-element="color-ramp-action"
+                            label="Color ramps" placement="top-start" closable>
+                            <calcite-panel heading="Color ramp">
+                                <calcite-list id="color-ramp-list" label="Available color ramps"
+                                    selection-mode="single-persist"></calcite-list>
+                            </calcite-panel>
+                        </calcite-popover>
                     </calcite-tab>
-                    <calcite-tab>
+                    <calcite-tab id="table-tab">
                         <arcgis-feature-table reference-element="map" map-layer-id="1a06d698622-layer-5"
                             sync-view-selection table-title="Threatened Species Richness"></arcgis-feature-table>
                     </calcite-tab>
-                    <calcite-tab>
+                    <calcite-tab id="chart-tab">
                         <arcgis-chart sync-view-selection>
                             <arcgis-charts-action-bar slot="action-bar"></arcgis-charts-action-bar>
                         </arcgis-chart>
                     </calcite-tab>
-                    <calcite-tab>
-                        <calcite-block id="SelectedValueBlock" collapsed>
-                            <calcite-chip id="selected-hexagon-chip" kind="inverse"> No selection</calcite-chip>
-                        </calcite-block>
-                        <arcgis-selection-toolbar reference-element="map"></arcgis-selection-toolbar>
-                        <arcgis-selection-list display-mode="feature" hidden id="selection-list" hide-menu
-                            hide-layer-filter hide-header label="Selection List" hide-item-close-actions
-                            reference-element="map"></arcgis-selection-list>
+                    <calcite-tab id="selection-tab">
+                        <div class="selection-tab-layout">
+                            <calcite-block id="SelectedValueBlock" collapsed>
+                                <calcite-chip id="selection-variable-chip" kind="inverse"> fieldname </calcite-chip>
+                            </calcite-block>
+                            <arcgis-selection-toolbar reference-element="map"></arcgis-selection-toolbar>
+                            <arcgis-selection-list display-mode="feature" hidden id="selection-list" hide-menu
+                                hide-layer-filter hide-header label="Selection List"
+                                reference-element="map"></arcgis-selection-list>
+                        </div>
                     </calcite-tab>
                 </calcite-tabs>
             </calcite-shell>
+        </calcite-dialog>
+        <calcite-dialog modal heading="Biodiversity and Conservation - Code" id="code-dialog" width="l" slot="dialogs">
+            <div class="code-dialog-content">
+                <calcite-tabs>
+                    <calcite-tab-nav slot="title-group">
+                        <calcite-tab-title selected>Apply smart mapping</calcite-tab-title>
+                    </calcite-tab-nav>
+                    <calcite-tab selected>
+                        <arcgis-code-editor id="code-snippets" language="javascript"></arcgis-code-editor>
+                    </calcite-tab>
+                </calcite-tabs>
+            </div>
         </calcite-dialog>
         <calcite-alert id="save-alert" slot="alerts" icon="smile" kind="success" label="Web map saved" auto-close
             auto-close-duration="slow">
@@ -163,6 +191,11 @@
             <div slot="message" id="save-error-message"></div>
         </calcite-alert>
     </calcite-shell>
+
+    <calcite-panel id="minimized-data-explorer" heading="Data Explorer" hidden>
+        <calcite-action id="restore-dialog" icon="chevron-up" text="Expand Data Explorer"
+            slot="header-actions-end"></calcite-action>
+    </calcite-panel>
 
     <!-- Application Script -->
     <script type="module" src="main.js?v=style-performance"></script>

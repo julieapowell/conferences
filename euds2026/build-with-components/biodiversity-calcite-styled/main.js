@@ -30,11 +30,14 @@ const saveErrorAlert = document.getElementById("save-error-alert");
 const saveErrorMessage = document.getElementById("save-error-message");
 const galleryAction = document.getElementById("gallery-action");
 const selectedAttributeChip = document.getElementById("selected-attribute-chip");
-const selectedHexagonChip = document.getElementById("selected-hexagon-chip");
+const selectionVariableChip = document.getElementById("selection-variable-chip");
 const popupElement = document.getElementById("popup");
 const similarFeaturesAction = document.getElementById("similar-features-action");
 const selectionList = document.getElementById("selection-list");
 const selectedValueBlock = document.getElementById("SelectedValueBlock");
+const toggleCodeAction = document.getElementById("toggle-code");
+const codeDialog = document.getElementById("code-dialog");
+const codeSnippets = document.getElementById("code-snippets");
 
 const SAVE_GROUP_TITLE = "Global Biodiversity and Conservation Maps";
 const GALLERY_PATH = "/apps/instant/gallery/index.html?appid=053eb0c7ab7345fca7bd43f94e4b9274&sortField=modified&sortOrder=desc&view=grid";
@@ -132,6 +135,7 @@ const biodiversityLayer = mapElement.map?.allLayers.find((layer) => {
 });
 
 await biodiversityLayer.load();
+const biodiversityLayerView = await view.whenLayerView(biodiversityLayer);
 const [colorSchemes, symbolUtils, univariateColorSizeRendererCreator] = await $arcgis.import([
     "@arcgis/core/smartMapping/symbology/color.js",
     "@arcgis/core/symbols/support/symbolUtils.js",
@@ -142,29 +146,53 @@ const [colorSchemes, symbolUtils, univariateColorSizeRendererCreator] = await $a
 //  Selection list and selected hexagon
 //////////////////////////////////////////////////////
 
-function updateSelectionListVisibility(event) {
-    selectionList.hidden = !view.selectionManager.hasSelection;
-    selectedValueBlock.expanded = view.selectionManager.hasSelection;
+let selectionChipUpdateId = 0;
 
-    if (event?.changes[0]?.removed?.length > 0) {
-        selectedHexagonChip.textContent = "";
-        selectedValueBlock.heading = "";
-        selectedHexagonChip.closed = true;
-    }
+function updateSelectionListVisibility() {
+    selectionList.hidden = !view.selectionManager.hasSelection;
 }
 
-function updateSelectedHexagonChip(field, event) {
-    if (event?.item && field) {
-        selectedValueBlock.expanded = true;
-        selectedValueBlock.heading = `${field.alias}`;
-        const itemValue = event.item.graphic?.getAttribute(field.name);
-        selectedHexagonChip.closed = false;
-        selectedHexagonChip.textContent = `${itemValue}`;
+async function updateSelectionListChip(field, item) {
+    const updateId = ++selectionChipUpdateId;
+
+    if (!field) {
         return;
     }
+
+    if (!item) {
+        selectionVariableChip.textContent = "";
+        return;
+    }
+
+    selectedValueBlock.expanded = true;
+    selectedValueBlock.heading = field.alias;
+    selectionVariableChip.textContent = "";
+
+    let itemValue = item.graphic?.getAttribute(field.name);
+    if (itemValue === undefined) {
+        const objectId = item.graphic?.getObjectId?.() ??
+            item.graphic?.getAttribute(biodiversityLayer.objectIdField);
+
+        if (objectId != null) {
+            try {
+                const featureSet = await biodiversityLayerView.queryFeatures({
+                    objectIds: [objectId],
+                    outFields: [field.name],
+                    returnGeometry: false
+                });
+                itemValue = featureSet.features[0]?.getAttribute(field.name);
+            } catch (error) {
+                console.warn(`Unable to load ${field.name} for the selected feature`, error);
+            }
+        }
+    }
+
+    if (updateId === selectionChipUpdateId && itemValue !== undefined) {
+        selectionVariableChip.textContent = `${itemValue}`;
+    }
 }
 
-selectionList.afterListItemSelect = (event) => updateSelectedHexagonChip(selectedSizeField, event);
+selectionList.afterListItemSelect = (event) => updateSelectionListChip(selectedSizeField, event.item);
 view.selectionManager.on("selection-change", updateSelectionListVisibility);
 updateSelectionListVisibility();
 
@@ -183,7 +211,6 @@ let numericalFields = [];
 const statisticsByField = new Map();
 let mappingUpdateId = 0;
 let requestedMappingKey = "";
-
 
 function extractNumericalFields() {
     numericalFields = [];
@@ -360,7 +387,7 @@ function initializeFromExistingRenderer() {
     if (initialField && sizeValuePicker) {
         selectedSizeField = initialField;
         updateSelectedAttributeChip(initialField);
-        updateSelectedHexagonChip(initialField, null);
+        updateSelectionListChip(initialField, null);
         sizeValuePicker.currentValue = {
             value: initialField.name,
             label: initialField.alias
@@ -386,7 +413,7 @@ function wireUpEvents() {
             }
 
             updateSelectedAttributeChip(field);
-            updateSelectedHexagonChip(field, null);
+            updateSelectionListChip(field, null);
 
             if (selectedSizeField && selected.value === selectedSizeField.name) {
                 return;
@@ -578,7 +605,7 @@ async function highlightSimilarFeatures() {
 //  Chart setup
 //////////////////////////////////////////////////////
 
-let chartInitializationPromise;
+/* let chartInitializationPromise;
 
 async function initializeChart() {
     if (chartInitializationPromise) {
@@ -614,7 +641,7 @@ sharedTabs?.addEventListener("calciteTabChange", () => {
             initializeChart().catch((error) => console.error("Unable to initialize chart", error));
         }
     });
-});
+}); */
 
 
 //////////////////////////////////////////////////////
@@ -701,6 +728,15 @@ async function buildGalleryUrl() {
 //////////////////////////////////////////////////////
 
 function init() {
+    codeSnippets.editorOptions = {
+        fontSize: 18,
+        readOnly: true
+    };
+    codeSnippets.value = applyMapping.toString();
+    toggleCodeAction.addEventListener("click", () => {
+        codeDialog.open = true;
+    });
+
     saveAction.addEventListener("click", () => handleSaveClick());
 
     galleryAction.addEventListener("click", async () => {

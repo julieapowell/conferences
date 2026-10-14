@@ -28,6 +28,14 @@
     --calcite-color-status-success: #477638;
 }
 
+html,
+body,
+calcite-shell {
+    margin: 0;
+    inline-size: 100%;
+    block-size: 100%;
+}
+
 body {
     background: linear-gradient(135deg, #dbe8d5 0%, var(--mist-100) 52%, #d4e4d3 100%);
     color: var(--forest-950);
@@ -215,6 +223,37 @@ calcite-dialog {
     --calcite-dialog-content-space: 0;
 }
 
+.code-dialog-content {
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    block-size: min(70vh, 50rem);
+    min-block-size: min(31.25rem, 70vh);
+    overflow: hidden;
+}
+
+.code-dialog-content calcite-tabs,
+.code-dialog-content calcite-tab {
+    display: flex;
+    flex-direction: column;
+    min-block-size: 0;
+    block-size: 100%;
+}
+
+.code-dialog-content calcite-tab {
+    padding: 0;
+}
+
+#code-snippets {
+    flex: 1 1 auto;
+    inline-size: 100%;
+    min-block-size: 0;
+}
+
+#toggle-code {
+    filter: drop-shadow(0 3px 8px rgba(32, 50, 24, 0.18));
+}
+
 #shell-panel-bottom[resizable] {
     --calcite-shell-panel-min-width: 22rem;
     --calcite-shell-panel-max-width: 60vw;
@@ -291,6 +330,6 @@ arcgis-chart {
     margin-bottom: var(--calcite-spacing-lg);
 }
 
-#selected-hexagon-chip {
+#selection-variable-chip {
     --calcite-chip-background-color: var(--sage-300);
 }

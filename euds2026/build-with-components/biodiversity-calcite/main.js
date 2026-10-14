@@ -4,6 +4,11 @@ const statusChip = document.getElementById("status-chip");
 let statusChipLabel = statusChip ? statusChip.textContent.trim() : "";
 const statusTooltip = document.getElementById("status-tooltip");
 const sharedTabs = document.getElementById("shared-tabs");
+const mapConfigurationTab = document.getElementById("map-configuration-tab");
+const mapConfigurationBlocks = document.getElementById("map-configuration-blocks");
+const colorRampAction = document.getElementById("color-ramp-action");
+const colorRampPopover = document.getElementById("color-ramp-popover");
+const colorRampList = document.getElementById("color-ramp-list");
 const chartTabTitle = sharedTabs?.querySelector('calcite-tab-title[value="chart"]');
 
 const shellPanelBottom = document.getElementById("shell-panel-bottom");
@@ -12,6 +17,9 @@ const panelTabsHost = document.getElementById("panel-tabs-host");
 const dialogTabsHost = document.getElementById("dialog-tabs-host");
 const popOutAction = document.getElementById("pop-out");
 const dockAction = document.getElementById("dock");
+const minimizeDialogAction = document.getElementById("minimize-dialog");
+const minimizedDataExplorer = document.getElementById("minimized-data-explorer");
+const restoreDialogAction = document.getElementById("restore-dialog");
 const saveAction = document.getElementById("save");
 const saveAlert = document.getElementById("save-alert");
 const saveAlertLink = document.getElementById("save-alert-link");
@@ -19,18 +27,79 @@ const saveErrorAlert = document.getElementById("save-error-alert");
 const saveErrorMessage = document.getElementById("save-error-message");
 const galleryAction = document.getElementById("gallery-action");
 const selectedAttributeChip = document.getElementById("selected-attribute-chip");
+const selectionVariableChip = document.getElementById("selection-variable-chip");
 const popupElement = document.getElementById("popup");
 const similarFeaturesAction = document.getElementById("similar-features-action");
-const selectedHexagonChip = document.getElementById("selected-hexagon-chip");
 const selectionList = document.getElementById("selection-list");
 const selectedValueBlock = document.getElementById("SelectedValueBlock");
+const toggleCodeAction = document.getElementById("toggle-code");
+const codeDialog = document.getElementById("code-dialog");
+const codeSnippets = document.getElementById("code-snippets");
+
 const SAVE_GROUP_TITLE = "Global Biodiversity and Conservation Maps";
 const GALLERY_PATH = "/apps/instant/gallery/index.html?appid=053eb0c7ab7345fca7bd43f94e4b9274&sortField=modified&sortOrder=desc&view=grid";
+const MAP_CONFIGURATION_HEIGHT_BUFFER = 86;
+const AUTOMATIC_RAMP_VALUE = "recommended-automatic";
+let mapConfigurationHeightFrozen = false;
+let selectedColorRamp = AUTOMATIC_RAMP_VALUE;
 
 function moveTabsTo(host) {
     if (host && sharedTabs.parentElement !== host) {
+        colorRampPopover.open = false;
         host.prepend(sharedTabs);
     }
+}
+
+function lockTabsToMapConfigurationHeight() {
+    if (!mapConfigurationTab?.selected || mapConfigurationHeightFrozen) {
+        return;
+    }
+
+    const tabNav = sharedTabs.querySelector("calcite-tab-nav");
+    const tabRect = mapConfigurationTab.getBoundingClientRect();
+    const blocksRect = mapConfigurationBlocks?.getBoundingClientRect();
+    const renderedContentHeight = blocksRect
+        ? blocksRect.bottom - tabRect.top
+        : 0;
+    const height = Math.ceil(
+        renderedContentHeight + tabNav.getBoundingClientRect().height + MAP_CONFIGURATION_HEIGHT_BUFFER
+    );
+
+    if (height > 0) {
+        const value = `${height}px`;
+        const tabNavHeight = `${tabNav.getBoundingClientRect().height}px`;
+        dialogTabsHost.style.setProperty("--map-configuration-tabs-height", value);
+        dialogTabsHost.style.setProperty("--tabs-navigation-height", tabNavHeight);
+        panelTabsHost.style.setProperty("--map-configuration-tabs-height", value);
+        panelTabsHost.style.setProperty("--tabs-navigation-height", tabNavHeight);
+    }
+}
+
+function freezeMapConfigurationHeight() {
+    const height = dialogTabsHost.getBoundingClientRect().height || panelTabsHost.getBoundingClientRect().height;
+    if (height <= 0) {
+        return;
+    }
+
+    const value = `${Math.ceil(height)}px`;
+    dialogTabsHost.style.setProperty("--map-configuration-tabs-height", value);
+    panelTabsHost.style.setProperty("--map-configuration-tabs-height", value);
+    mapConfigurationHeightFrozen = true;
+}
+
+function openDataExplorerDialog() {
+    const refreshLayout = sharedTabs.parentElement !== dialogTabsHost && dialogEl.open;
+    moveTabsTo(dialogTabsHost);
+
+    if (refreshLayout) {
+        dialogEl.open = false;
+        setTimeout(() => {
+            dialogEl.open = true;
+        }, 0);
+        return;
+    }
+
+    dialogEl.open = true;
 }
 
 const BREAKPOINT_SMALL = 800;
@@ -58,7 +127,10 @@ const biodiversityLayer = mapElement.map?.allLayers.find((layer) => {
 });
 
 await biodiversityLayer.load();
-const [univariateColorSizeRendererCreator] = await $arcgis.import([
+const biodiversityLayerView = await view.whenLayerView(biodiversityLayer);
+const [colorSchemes, symbolUtils, univariateColorSizeRendererCreator] = await $arcgis.import([
+    "@arcgis/core/smartMapping/symbology/color.js",
+    "@arcgis/core/symbols/support/symbolUtils.js",
     "@arcgis/core/smartMapping/renderers/univariateColorSize.js"
 ]);
 
@@ -66,28 +138,53 @@ const [univariateColorSizeRendererCreator] = await $arcgis.import([
 //  Selection list and selected hexagon
 //////////////////////////////////////////////////////
 
-function updateSelectionListVisibility(ev) {
+let selectionChipUpdateId = 0;
+
+function updateSelectionListVisibility() {
     selectionList.hidden = !view.selectionManager.hasSelection;
-    selectedValueBlock.expanded = view.selectionManager.hasSelection;
-    if (ev?.changes[0]?.removed?.length > 0) {
-        selectedHexagonChip.textContent = "";
-         selectedValueBlock.heading = "";
-         selectedHexagonChip.closed = true;
-    }  
 }
 
-function updateSelectedHexagonChip(field, event) {  
-    if (event?.item && field) {
-        selectedValueBlock.expanded = true;
-        selectedValueBlock.heading = `${field.alias}`;
-        const itemValue = event?.item?.graphic?.getAttribute(field.name);
-        selectedHexagonChip.closed = false;
-        selectedHexagonChip.textContent = event?.item ? `${itemValue}` : "";
+async function updateSelectionListChip(field, item) {
+    const updateId = ++selectionChipUpdateId;
+
+    if (!field) {
         return;
-    }    
+    }
+
+    if (!item) {
+        selectionVariableChip.textContent = "";
+        return;
+    }
+
+    selectedValueBlock.expanded = true;
+    selectedValueBlock.heading = field.alias;
+    selectionVariableChip.textContent = "";
+
+    let itemValue = item.graphic?.getAttribute(field.name);
+    if (itemValue === undefined) {
+        const objectId = item.graphic?.getObjectId?.() ??
+            item.graphic?.getAttribute(biodiversityLayer.objectIdField);
+
+        if (objectId != null) {
+            try {
+                const featureSet = await biodiversityLayerView.queryFeatures({
+                    objectIds: [objectId],
+                    outFields: [field.name],
+                    returnGeometry: false
+                });
+                itemValue = featureSet.features[0]?.getAttribute(field.name);
+            } catch (error) {
+                console.warn(`Unable to load ${field.name} for the selected feature`, error);
+            }
+        }
+    }
+
+    if (updateId === selectionChipUpdateId && itemValue !== undefined) {
+        selectionVariableChip.textContent = `${itemValue}`;
+    }
 }
 
-selectionList.afterListItemSelect = (event) => updateSelectedHexagonChip(selectedSizeField, event);
+selectionList.afterListItemSelect = (event) => updateSelectionListChip(selectedSizeField, event.item);
 view.selectionManager.on("selection-change", updateSelectionListVisibility);
 updateSelectionListVisibility();
 
@@ -107,7 +204,6 @@ let numericalFields = [];
 const statisticsByField = new Map();
 let mappingUpdateId = 0;
 let requestedMappingKey = "";
-
 
 function extractNumericalFields() {
     numericalFields = [];
@@ -162,6 +258,83 @@ function updateSelectedAttributeChip(field) {
     }
 }
 
+function getColorTheme() {
+    return ["above", "below"].includes(sizeThemeSelector?.value)
+        ? "high-to-low"
+        : "above-and-below";
+}
+
+function createColorRampItem(value, heading, scheme, description = "") {
+    const item = document.createElement("calcite-list-item");
+    item.dataset.rampValue = value;
+    item.heading = heading;
+    item.description = description;
+    item.label = description ? `${heading}, ${description}` : heading;
+    item.selected = value === selectedColorRamp;
+
+    const previewContainer = document.createElement("div");
+    previewContainer.slot = "content-start";
+    previewContainer.className = "color-ramp-preview";
+    previewContainer.append(symbolUtils.renderColorRampPreviewHTML(scheme.colors, {
+        align: "horizontal",
+        width: 112,
+        height: 18,
+        gradient: true,
+        ariaLabel: `${scheme.name} color ramp`
+    }));
+    item.append(previewContainer);
+    return item;
+}
+
+function populateColorRamps(resetToAutomatic = false) {
+    if (resetToAutomatic) {
+        selectedColorRamp = AUTOMATIC_RAMP_VALUE;
+    }
+
+    const schemes = colorSchemes.getSchemes({
+        basemap: mapElement.map.basemap,
+        geometryType: biodiversityLayer.geometryType,
+        theme: getColorTheme()
+    });
+    colorRampList.replaceChildren();
+
+    if (!schemes?.primaryScheme) {
+        return;
+    }
+
+    const recommendedSchemes = [schemes.primaryScheme, ...(schemes.secondarySchemes || [])];
+    const uniqueSchemes = recommendedSchemes.filter(
+        (scheme, index) => scheme && recommendedSchemes.findIndex((candidate) => candidate?.name === scheme.name) === index
+    );
+    const availableValues = new Set(uniqueSchemes.map((scheme) => scheme.name));
+    if (selectedColorRamp !== AUTOMATIC_RAMP_VALUE && !availableValues.has(selectedColorRamp)) {
+        selectedColorRamp = AUTOMATIC_RAMP_VALUE;
+    }
+
+    colorRampList.append(createColorRampItem(
+        AUTOMATIC_RAMP_VALUE,
+        "Auto",
+        schemes.primaryScheme,
+        `Recommended: ${schemes.primaryScheme.name}`
+    ));
+    for (const scheme of uniqueSchemes) {
+        colorRampList.append(createColorRampItem(scheme.name, scheme.name, scheme));
+    }
+}
+
+function getSelectedColorScheme() {
+    if (selectedColorRamp === AUTOMATIC_RAMP_VALUE) {
+        return null;
+    }
+
+    return colorSchemes.getSchemeByName({
+        basemap: mapElement.map.basemap,
+        geometryType: biodiversityLayer.geometryType,
+        theme: getColorTheme(),
+        name: selectedColorRamp
+    });
+}
+
 
 async function updateFeatureTable(field) {
     if (!featureTable || !field) {
@@ -207,7 +380,7 @@ function initializeFromExistingRenderer() {
     if (initialField && sizeValuePicker) {
         selectedSizeField = initialField;
         updateSelectedAttributeChip(initialField);
-        updateSelectedHexagonChip(initialField, null);
+        updateSelectionListChip(initialField, null);
         sizeValuePicker.currentValue = {
             value: initialField.name,
             label: initialField.alias
@@ -233,13 +406,14 @@ function wireUpEvents() {
             }
 
             updateSelectedAttributeChip(field);
-            updateSelectedHexagonChip(field, null);
+            updateSelectionListChip(field, null);
 
             if (selectedSizeField && selected.value === selectedSizeField.name) {
                 return;
             }
 
             selectedSizeField = field;
+            populateColorRamps();
             await Promise.all([
                 applyMapping(),
                 updateFeatureTable(field)
@@ -249,7 +423,9 @@ function wireUpEvents() {
 
     if (sizeThemeSelector) {
         sizeThemeSelector.addEventListener("calciteSegmentedControlChange", async () => {
+            freezeMapConfigurationHeight();
             updateSymbolStyleVisibility();
+            populateColorRamps();
 
             if (!selectedSizeField) {
                 return;
@@ -268,6 +444,29 @@ function wireUpEvents() {
             await applyMapping();
         });
     }
+
+    colorRampAction?.addEventListener("click", (event) => {
+        event.stopPropagation();
+        colorRampPopover.open = true;
+    });
+
+    colorRampList?.addEventListener("click", async (event) => {
+        const item = event.composedPath().find((element) => element?.tagName === "CALCITE-LIST-ITEM");
+        if (!item?.dataset.rampValue) {
+            return;
+        }
+
+        colorRampPopover.open = false;
+        if (item.dataset.rampValue === selectedColorRamp) {
+            return;
+        }
+
+        selectedColorRamp = item.dataset.rampValue;
+        for (const rampItem of colorRampList.querySelectorAll("calcite-list-item")) {
+            rampItem.selected = rampItem === item;
+        }
+        await applyMapping();
+    });
 }
 
 function updateSymbolStyleVisibility() {
@@ -286,7 +485,8 @@ async function applyMapping() {
     const symbolStyle = sizeTheme === "above-and-below"
         ? symbolStyleSelector?.value || "arrow"
         : "circle";
-    const mappingKey = [field.name, sizeTheme, symbolStyle].join("|");
+    const colorScheme = getSelectedColorScheme();
+    const mappingKey = [field.name, sizeTheme, symbolStyle, colorScheme?.name || selectedColorRamp].join("|");
     if (mappingKey === requestedMappingKey) {
         return;
     }
@@ -302,6 +502,10 @@ async function applyMapping() {
         statistics: statisticsByField.get(field.name),
         symbolOptions: {
             symbolStyle
+        },
+        colorOptions: {
+            isContinuous: true,
+            colorScheme
         }
     };
 
@@ -324,6 +528,7 @@ async function applyMapping() {
 extractNumericalFields();
 await populateAttributeLists();
 initializeFromExistingRenderer();
+populateColorRamps(true);
 await updateFeatureTable(selectedSizeField);
 wireUpEvents();
 
@@ -506,6 +711,15 @@ async function buildGalleryUrl() {
 //////////////////////////////////////////////////////
 
 function init() {
+    codeSnippets.editorOptions = {
+        fontSize: 18,
+        readOnly: true
+    };
+    codeSnippets.value = applyMapping.toString();
+    toggleCodeAction.addEventListener("click", () => {
+        codeDialog.open = true;
+    });
+
     saveAction.addEventListener("click", () => handleSaveClick());
 
     galleryAction.addEventListener("click", async () => {
@@ -527,16 +741,42 @@ function init() {
             if (isSmall) {
                 return;
             }
+            lockTabsToMapConfigurationHeight();
             shellPanelBottom.hidden = true;
-            moveTabsTo(dialogTabsHost);
-            dialogEl.open = true;
+            minimizedDataExplorer.hidden = true;
+            openDataExplorerDialog();
         });
 
         dockAction.addEventListener("click", () => {
             dialogEl.open = false;
+            minimizedDataExplorer.hidden = true;
             shellPanelBottom.hidden = false;
             moveTabsTo(panelTabsHost);
             popOutAction.setFocus();
+        });
+    }
+
+    minimizeDialogAction?.addEventListener("click", () => {
+        dialogEl.open = false;
+        minimizedDataExplorer.hidden = false;
+        restoreDialogAction.setFocus();
+    });
+
+    restoreDialogAction?.addEventListener("click", () => {
+        minimizedDataExplorer.hidden = true;
+        shellPanelBottom.hidden = true;
+        openDataExplorerDialog();
+        minimizeDialogAction.setFocus();
+    });
+
+    if (window.ResizeObserver && mapConfigurationTab) {
+        const tabHeightObserver = new ResizeObserver(lockTabsToMapConfigurationHeight);
+        tabHeightObserver.observe(mapConfigurationTab);
+        if (mapConfigurationBlocks) {
+            tabHeightObserver.observe(mapConfigurationBlocks);
+        }
+        sharedTabs.addEventListener("calciteTabChange", () => {
+            requestAnimationFrame(lockTabsToMapConfigurationHeight);
         });
     }
 
@@ -545,7 +785,11 @@ function init() {
         const ro = new ResizeObserver(() => handleResponsiveLayout());
         ro.observe(shellPanelBottom);
     }
-    window.addEventListener("resize", handleResponsiveLayout);
+    window.addEventListener("resize", () => {
+        mapConfigurationHeightFrozen = false;
+        handleResponsiveLayout();
+        requestAnimationFrame(lockTabsToMapConfigurationHeight);
+    });
     handleResponsiveLayout();
 }
 
@@ -559,6 +803,7 @@ function handleResponsiveLayout() {
     if (isSmall) {
         shellPanelBottom.hidden = false;
         dialogEl.open = false;
+        minimizedDataExplorer.hidden = true;
         moveTabsTo(panelTabsHost);
         if (popOutAction) {
             popOutAction.hidden = true;
@@ -573,8 +818,9 @@ function handleResponsiveLayout() {
         }
     } else {
         if (dialogEl.open) {
+            lockTabsToMapConfigurationHeight();
             shellPanelBottom.hidden = true;
-            moveTabsTo(dialogTabsHost);
+            openDataExplorerDialog();
         } else {
             shellPanelBottom.hidden = false;
             moveTabsTo(panelTabsHost);
