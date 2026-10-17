@@ -554,9 +554,8 @@ wireUpEvents();
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 async function clearSimilarFeatures() {
-    const layerView = await view.whenLayerView(biodiversityLayer);
-    await layerView.when();
-    layerView.featureEffect = null;
+    await biodiversityLayerView.when();
+    biodiversityLayerView.featureEffect = null;
 }
 
 async function highlightSimilarFeatures() {
@@ -565,7 +564,28 @@ async function highlightSimilarFeatures() {
     }
 
     const field = selectedSizeField;
-    const attributeValue = Number(popupElement.selectedFeature?.attributes?.[field.name]);
+    const selectedFeature = popupElement.selectedFeature;
+    const selectedFeatureLayer = selectedFeature?.sourceLayer ?? selectedFeature?.layer;
+    if (!selectedFeature || selectedFeatureLayer?.id !== biodiversityLayer.id) {
+        return;
+    }
+
+    let itemValue = selectedFeature.attributes?.[field.name];
+    if (itemValue === undefined) {
+        const objectId = selectedFeature.getObjectId?.() ??
+            selectedFeature.attributes?.[biodiversityLayer.objectIdField];
+
+        if (objectId != null) {
+            const featureSet = await biodiversityLayerView.queryFeatures({
+                objectIds: [objectId],
+                outFields: [field.name],
+                returnGeometry: false
+            });
+            itemValue = featureSet.features[0]?.getAttribute(field.name);
+        }
+    }
+
+    const attributeValue = Number(itemValue);
     if (!Number.isFinite(attributeValue)) {
         return;
     }
@@ -577,9 +597,8 @@ async function highlightSimilarFeatures() {
             "@arcgis/core/core/reactiveUtils.js",
             "@arcgis/core/layers/support/FeatureEffect.js"
         ]);
-        const layerView = await view.whenLayerView(biodiversityLayer);
-        await layerView.when();
-        await reactiveUtils.whenOnce(() => !layerView.updating);
+        await biodiversityLayerView.when();
+        await reactiveUtils.whenOnce(() => !biodiversityLayerView.updating);
 
         let statistics = statisticsByField.get(field.name);
         if (!statistics) {
@@ -598,7 +617,7 @@ async function highlightSimilarFeatures() {
             return;
         }
 
-        layerView.featureEffect = new FeatureEffect({
+        biodiversityLayerView.featureEffect = new FeatureEffect({
             filter: {
                 where: `${field.name} BETWEEN ${attributeValue - val} AND ${attributeValue + val}`
             },
@@ -703,7 +722,11 @@ function init() {
         window.open(galleryUrl, "_blank", "noopener");
     });
 
-    similarFeaturesAction.addEventListener("click", () => highlightSimilarFeatures());
+    similarFeaturesAction.addEventListener("click", () => {
+        highlightSimilarFeatures().catch((error) => {
+            console.error("Unable to highlight similar features", error);
+        });
+    });
 
     popupElement.addEventListener("arcgisPropertyChange", (event) => {
         if (event.detail?.name === "open" && !popupElement.open) {

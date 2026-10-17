@@ -1,6 +1,4 @@
 const mapElement = document.querySelector("arcgis-map");
-const chartElement = document.querySelector("arcgis-chart");
-const chartActionBar = document.querySelector("arcgis-charts-action-bar");
 const statusChip = document.getElementById("status-chip");
 let statusChipLabel = statusChip ? statusChip.textContent.trim() : "";
 const statusTooltip = document.getElementById("status-tooltip");
@@ -11,7 +9,6 @@ const symbolStyleBlock = document.getElementById("symbol-style-block");
 const colorRampAction = document.getElementById("color-ramp-action");
 const colorRampPopover = document.getElementById("color-ramp-popover");
 const colorRampList = document.getElementById("color-ramp-list");
-const chartTabTitle = sharedTabs?.querySelector('calcite-tab-title[value="chart"]');
 
 const shellPanelBottom = document.getElementById("shell-panel-bottom");
 const dialogEl = document.getElementById("dialog");
@@ -546,9 +543,8 @@ wireUpEvents();
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 async function clearSimilarFeatures() {
-    const layerView = await view.whenLayerView(biodiversityLayer);
-    await layerView.when();
-    layerView.featureEffect = null;
+    await biodiversityLayerView.when();
+    biodiversityLayerView.featureEffect = null;
 }
 
 async function highlightSimilarFeatures() {
@@ -557,7 +553,28 @@ async function highlightSimilarFeatures() {
     }
 
     const field = selectedSizeField;
-    const attributeValue = Number(popupElement.selectedFeature?.attributes?.[field.name]);
+    const selectedFeature = popupElement.selectedFeature;
+    const selectedFeatureLayer = selectedFeature?.sourceLayer ?? selectedFeature?.layer;
+    if (!selectedFeature || selectedFeatureLayer?.id !== biodiversityLayer.id) {
+        return;
+    }
+
+    let itemValue = selectedFeature.attributes?.[field.name];
+    if (itemValue === undefined) {
+        const objectId = selectedFeature.getObjectId?.() ??
+            selectedFeature.attributes?.[biodiversityLayer.objectIdField];
+
+        if (objectId != null) {
+            const featureSet = await biodiversityLayerView.queryFeatures({
+                objectIds: [objectId],
+                outFields: [field.name],
+                returnGeometry: false
+            });
+            itemValue = featureSet.features[0]?.getAttribute(field.name);
+        }
+    }
+
+    const attributeValue = Number(itemValue);
     if (!Number.isFinite(attributeValue)) {
         return;
     }
@@ -569,9 +586,8 @@ async function highlightSimilarFeatures() {
             "@arcgis/core/core/reactiveUtils.js",
             "@arcgis/core/layers/support/FeatureEffect.js"
         ]);
-        const layerView = await view.whenLayerView(biodiversityLayer);
-        await layerView.when();
-        await reactiveUtils.whenOnce(() => !layerView.updating);
+        await biodiversityLayerView.when();
+        await reactiveUtils.whenOnce(() => !biodiversityLayerView.updating);
 
         let statistics = statisticsByField.get(field.name);
         if (!statistics) {
@@ -590,7 +606,7 @@ async function highlightSimilarFeatures() {
             return;
         }
 
-        layerView.featureEffect = new FeatureEffect({
+        biodiversityLayerView.featureEffect = new FeatureEffect({
             filter: {
                 where: `${field.name} BETWEEN ${attributeValue - val} AND ${attributeValue + val}`
             },
@@ -601,49 +617,6 @@ async function highlightSimilarFeatures() {
         similarFeaturesAction.loading = false;
     }
 }
-
-//////////////////////////////////////////////////////
-//  Chart setup
-//////////////////////////////////////////////////////
-
-/* let chartInitializationPromise;
-
-async function initializeChart() {
-    if (chartInitializationPromise) {
-        return chartInitializationPromise;
-    }
-
-    chartInitializationPromise = (async () => {
-        const [{ createModel }] = await $arcgis.import(["@arcgis/charts-components"]);
-        chartElement.model = await createModel({
-            layer: biodiversityLayer,
-            config: biodiversityLayer.charts[0]
-        });
-        chartElement.model.hideEmptyRowsAndColumns = true;
-        chartElement.view = view;
-        chartElement.layer = biodiversityLayer;
-
-        await chartActionBar.componentOnReady?.();
-        await new Promise((resolve) => requestAnimationFrame(resolve));
-        const calciteChartActionBar = chartActionBar.shadowRoot?.querySelector("calcite-action-bar");
-        await calciteChartActionBar?.componentOnReady?.();
-        const chartActionBarContainer = calciteChartActionBar?.shadowRoot?.querySelector(".container");
-        if (chartActionBarContainer) {
-            chartActionBarContainer.style.overflowY = "hidden";
-        }
-    })();
-
-    return chartInitializationPromise;
-}
-
-sharedTabs?.addEventListener("calciteTabChange", () => {
-    requestAnimationFrame(() => {
-        if (chartTabTitle?.selected) {
-            initializeChart().catch((error) => console.error("Unable to initialize chart", error));
-        }
-    });
-}); */
-
 
 //////////////////////////////////////////////////////
 //  Save the web map
@@ -737,7 +710,11 @@ function init() {
         window.open(galleryUrl, "_blank", "noopener");
     });
 
-    similarFeaturesAction.addEventListener("click", () => highlightSimilarFeatures());
+    similarFeaturesAction.addEventListener("click", () => {
+        highlightSimilarFeatures().catch((error) => {
+            console.error("Unable to highlight similar features", error);
+        });
+    });
 
     popupElement.addEventListener("arcgisPropertyChange", (event) => {
         if (event.detail?.name === "open" && !popupElement.open) {
