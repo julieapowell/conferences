@@ -140,7 +140,7 @@ populateNavigationUser(portalItem.portal).catch((error) => {
 });
 
 const biodiversityLayer = mapElement.map?.allLayers.find((layer) => {
-    return layer.title === "Global Hexagons: Biodiversity and Conservation (Level 3)";
+    return layer.title === "Biodiversity and Conservation";
 });
 
 await biodiversityLayer.load();
