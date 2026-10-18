@@ -174,12 +174,14 @@
 &lt;/arcgis-value-picker&gt;'></arcgis-code-editor>
                     </calcite-tab>
                     <calcite-tab>
-                        <arcgis-code-editor id="smart-mapping-snippets" language="javascript" value='const params = {
+                        <arcgis-code-editor id="smart-mapping-snippets" language="javascript" value='const statistics = await getClientStatistics(field.name);
+
+const params = {
     layer: biodiversityLayer,
     view: mapElement.view,
     field: field.name,
     theme: sizeTheme,
-    statistics: statisticsByField.get(field.name),
+    statistics,
     symbolOptions: {
         symbolStyle
     },
@@ -189,8 +191,7 @@
     }
 };
 
-const { renderer, statistics } = await univariateColorSizeRendererCreator.createContinuousRenderer(params);
-statisticsByField.set(field.name, statistics);
+const { renderer } = await univariateColorSizeRendererCreator.createContinuousRenderer(params);
 biodiversityLayer.renderer = renderer;'></arcgis-code-editor>
                     </calcite-tab>
                     <calcite-tab>

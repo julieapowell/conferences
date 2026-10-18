@@ -128,11 +128,13 @@ const biodiversityLayer = mapElement.map?.allLayers.find((layer) => {
 });
 
 await biodiversityLayer.load();
+biodiversityLayer.outFields = ["*"];
 const biodiversityLayerView = await view.whenLayerView(biodiversityLayer);
-const [colorSchemes, symbolUtils, univariateColorSizeRendererCreator] = await $arcgis.import([
+const [colorSchemes, symbolUtils, univariateColorSizeRendererCreator, reactiveUtils] = await $arcgis.import([
     "@arcgis/core/smartMapping/symbology/color.js",
     "@arcgis/core/symbols/support/symbolUtils.js",
-    "@arcgis/core/smartMapping/renderers/univariateColorSize.js"
+    "@arcgis/core/smartMapping/renderers/univariateColorSize.js",
+    "@arcgis/core/core/reactiveUtils.js"
 ]);
 
 //////////////////////////////////////////////////////
@@ -161,14 +163,17 @@ async function updateSelectionListChip(field, item) {
     selectedValueBlock.heading = field.alias;
     selectionVariableChip.textContent = "";
 
+    const selectedLayer = item.layer ?? biodiversityLayer;
+    const selectedLayerView = item.layerView ?? biodiversityLayerView;
     let itemValue = item.graphic?.getAttribute(field.name);
     if (itemValue === undefined) {
-        const objectId = item.graphic?.getObjectId?.() ??
-            item.graphic?.getAttribute(biodiversityLayer.objectIdField);
+        const objectId = item.objectId ??
+            item.graphic?.getObjectId?.() ??
+            item.graphic?.getAttribute(selectedLayer.objectIdField);
 
         if (objectId != null) {
             try {
-                const featureSet = await biodiversityLayerView.queryFeatures({
+                const featureSet = await selectedLayerView.queryFeatures({
                     objectIds: [objectId],
                     outFields: [field.name],
                     returnGeometry: false
@@ -185,7 +190,7 @@ async function updateSelectionListChip(field, item) {
     }
 }
 
-selectionList.afterListItemSelect = (event) => updateSelectionListChip(selectedSizeField, event.item);
+selectionList.afterListItemSelect = ({ item }) => updateSelectionListChip(selectedSizeField, item);
 view.selectionManager.on("selection-change", updateSelectionListVisibility);
 updateSelectionListVisibility();
 
@@ -204,6 +209,35 @@ let numericalFields = [];
 const statisticsByField = new Map();
 let mappingUpdateId = 0;
 let requestedMappingKey = "";
+
+async function getClientStatistics(fieldName) {
+    const cachedStatistics = statisticsByField.get(fieldName);
+    if (cachedStatistics) {
+        return cachedStatistics;
+    }
+
+    await biodiversityLayerView.when();
+    await reactiveUtils.whenOnce(() => !biodiversityLayerView.suspended && !biodiversityLayerView.updating);
+    const query = biodiversityLayerView.createQuery();
+    query.outStatistics = ["min", "max", "avg", "stddev", "count"].map((statisticType) => ({
+        onStatisticField: fieldName,
+        outStatisticFieldName: statisticType,
+        statisticType
+    }));
+    query.returnGeometry = false;
+
+    const featureSet = await biodiversityLayerView.queryFeatures(query);
+    const attributes = featureSet.features[0]?.attributes ?? {};
+    const statistics = {
+        min: attributes.min ?? null,
+        max: attributes.max ?? null,
+        avg: attributes.avg ?? null,
+        stddev: attributes.stddev ?? null,
+        count: attributes.count ?? 0
+    };
+    statisticsByField.set(fieldName, statistics);
+    return statistics;
+}
 
 function extractNumericalFields() {
     numericalFields = [];
@@ -494,13 +528,14 @@ async function applyMapping() {
 
     requestedMappingKey = mappingKey;
     const updateId = ++mappingUpdateId;
+    const statistics = await getClientStatistics(field.name);
 
     const params = {
         layer: biodiversityLayer,
         view: mapElement.view,
         field: field.name,
         theme: sizeTheme,
-        statistics: statisticsByField.get(field.name),
+        statistics,
         symbolOptions: {
             symbolStyle
         },
@@ -511,12 +546,11 @@ async function applyMapping() {
     };
 
     try {
-        const { renderer, statistics } = await univariateColorSizeRendererCreator.createContinuousRenderer(params);
+        const { renderer } = await univariateColorSizeRendererCreator.createContinuousRenderer(params);
         if (updateId !== mappingUpdateId) {
             return;
         }
 
-        statisticsByField.set(field.name, statistics);
         biodiversityLayer.renderer = renderer;
     } catch (error) {
         if (updateId === mappingUpdateId) {
@@ -577,24 +611,13 @@ async function highlightSimilarFeatures() {
     similarFeaturesAction.loading = true;
 
     try {
-        const [reactiveUtils, FeatureEffect] = await $arcgis.import([
-            "@arcgis/core/core/reactiveUtils.js",
+        const [FeatureEffect] = await $arcgis.import([
             "@arcgis/core/layers/support/FeatureEffect.js"
         ]);
         await biodiversityLayerView.when();
         await reactiveUtils.whenOnce(() => !biodiversityLayerView.updating);
 
-        let statistics = statisticsByField.get(field.name);
-        if (!statistics) {
-            const result = await univariateColorSizeRendererCreator.createContinuousRenderer({
-                layer: biodiversityLayer,
-                view,
-                field: field.name,
-                theme: sizeThemeSelector?.value || "above"
-            });
-            statistics = result.statistics;
-            statisticsByField.set(field.name, statistics);
-        }
+        const statistics = await getClientStatistics(field.name);
         const val = statistics?.stddev / 4;
 
         if (!Number.isFinite(val) || !popupElement.open) {
