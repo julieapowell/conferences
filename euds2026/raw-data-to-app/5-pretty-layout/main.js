@@ -1,5 +1,3 @@
-const timeUtils = await $arcgis.import("@arcgis/core/support/timeUtils.js");
-const { watch } = await $arcgis.import("@arcgis/core/core/reactiveUtils.js");
 const viewElement = document.querySelector("arcgis-map");
 const calciteNavLogo = document.querySelector("calcite-navigation-logo");
 const timeBar = document.getElementById("time-slider-desktop");
@@ -13,7 +11,36 @@ const featureDetails = document.getElementById("feature-details");
 const mobileOverviewFlowItem = document.getElementById("mobile-overview-flow-item");
 const mobileFeatureFlowItem = document.getElementById("mobile-feature-flow-item");
 const mobileFeatureDetails = document.getElementById("mobile-feature-details");
+const toggleCodeAction = document.getElementById("toggle-code");
+const codeDialog = document.getElementById("code-dialog");
+const featureComponentSnippets = document.getElementById("feature-component-snippets");
+const mapSelectionSnippets = document.getElementById("map-selection-snippets");
 
+const editorOptions = {
+    detectIndentation: false,
+    fontSize: 18,
+    insertSpaces: true,
+    readOnly: true,
+    tabSize: 2
+};
+featureComponentSnippets.editorOptions = editorOptions;
+mapSelectionSnippets.editorOptions = editorOptions;
+featureComponentSnippets.value = `<arcgis-features id="feature-details" open hide-close-button></arcgis-features>`;
+mapSelectionSnippets.value = `viewElement.addEventListener("arcgisViewClick", async (event) => {
+    const { results } = await viewElement.hitTest(event.detail);
+    const hitResult = results?.find((result) => result.graphic?.attributes);
+
+    if (hitResult?.graphic) {
+        featureDetails.features = [hitResult.graphic];
+        overviewFlowItem.selected = false;
+        featureFlowItem.selected = true;
+    }
+});`;
+toggleCodeAction.addEventListener("click", () => {
+    codeDialog.open = true;
+});
+
+const { watch } = await $arcgis.import("@arcgis/core/core/reactiveUtils.js");
 await viewElement.viewOnReady();
 await Promise.all([timeBar.componentOnReady(), timeBarMobile.componentOnReady()]);
 const view = viewElement.view;
@@ -131,3 +158,4 @@ function applyFeatureEffect() {
         excludedEffect: "opacity(35%)",
     };
 }
+

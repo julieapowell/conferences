@@ -29,6 +29,7 @@
     <calcite-navigation slot="header">
       <!-- Heading and description dynamically populated below using JavaScript -->
       <calcite-navigation-logo heading-level="1" slot="logo"></calcite-navigation-logo>
+      <calcite-navigation-user id="navigation-user" slot="user" hidden></calcite-navigation-user>
     </calcite-navigation>
 
     <arcgis-map item-id="dd4b2f25487d4a37a45093ba6acd026d" popup-component-enabled>
@@ -46,6 +47,20 @@
 <script type="module">
   const viewElement = document.querySelector("arcgis-map");
   const calciteNavLogo = document.querySelector("calcite-navigation-logo");
+  const navigationUser = document.getElementById("navigation-user");
+
+  async function populateNavigationUser(portal) {
+    await portal.load();
+    const user = portal.user;
+    if (!user) {
+      return;
+    }
+
+    navigationUser.fullName = user.fullName || user.username;
+    navigationUser.username = user.username;
+    navigationUser.userId = user.username;
+    navigationUser.hidden = false;
+  }
 
   viewElement.addEventListener("arcgisViewReadyChange", () => {
     // Use metadata from the Web Map to populate the header
@@ -55,6 +70,9 @@
       calciteNavLogo.heading = title === "" ? "A web map" : title;
     }
 
+    populateNavigationUser(viewElement.map.portalItem.portal).catch((error) => {
+      console.warn("Unable to display the signed-in user", error);
+    });
   });
 </script>
 

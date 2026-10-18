@@ -34,6 +34,7 @@
         <calcite-chip value="Fall" id="fall">Fall</calcite-chip>
       </calcite-chip-group>
       <calcite-navigation-logo heading-level="1" slot="logo"></calcite-navigation-logo>
+      <calcite-navigation-user id="navigation-user" slot="user" hidden></calcite-navigation-user>
     </calcite-navigation>
     <calcite-tooltip reference-element="all-seasons" placement="bottom">
       <span>Warnings for the whole year</span>
@@ -59,11 +60,28 @@
           <arcgis-bookmarks></arcgis-bookmarks>
         </arcgis-expand>
         <arcgis-legend slot="bottom-left" legend-style="card" card-style-layout="stack"></arcgis-legend>
+        <calcite-fab id="toggle-code" slot="bottom-right" icon="code" text="Code snippets" kind="neutral"
+          scale="m"></calcite-fab>
+        <calcite-tooltip reference-element="toggle-code" placement="right" close-on-click>
+          Code snippets for this app
+        </calcite-tooltip>
       </arcgis-map>
       <arcgis-time-bar mode="time-window" reference-element="map" show-next show-play show-previous show-time-extent>
         <arcgis-time-bar-slider slot="time-extent"></arcgis-time-bar-slider>
       </arcgis-time-bar>
     </calcite-panel>
+    <calcite-dialog modal heading="Seasonal Tornado Warnings - Code" id="code-dialog" slot="dialogs">
+      <div class="code-dialog-content">
+        <calcite-tabs>
+          <calcite-tab-nav slot="title-group">
+            <calcite-tab-title selected>Maximum warnings</calcite-tab-title>
+          </calcite-tab-nav>
+          <calcite-tab selected>
+            <arcgis-code-editor id="code-snippets" language="javascript"></arcgis-code-editor>
+          </calcite-tab>
+        </calcite-tabs>
+      </div>
+    </calcite-dialog>
   </calcite-shell>
   <script type="module" src="./main.js"></script>
 </body>

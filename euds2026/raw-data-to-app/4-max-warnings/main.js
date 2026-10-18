@@ -1,14 +1,15 @@
-const timeUtils = await $arcgis.import("@arcgis/core/support/timeUtils.js");
-const { watch } = await $arcgis.import("@arcgis/core/core/reactiveUtils.js");
 const viewElement = document.querySelector("arcgis-map");
 const calciteNavLogo = document.querySelector("calcite-navigation-logo");
 const timeBar = document.querySelector("arcgis-time-bar");
 const seasonChips = document.querySelector("calcite-chip-group");
+const toggleCodeAction = document.getElementById("toggle-code");
+const codeDialog = document.getElementById("code-dialog");
+const codeSnippets = document.getElementById("code-snippets");
 
+const { watch } = await $arcgis.import("@arcgis/core/core/reactiveUtils.js");
 await viewElement.viewOnReady();
 await timeBar.componentOnReady();
 const { title, description } = viewElement.map.portalItem;
-
 if (calciteNavLogo) {
     calciteNavLogo.heading = title === "" ? "A web map" : title;
 }
@@ -53,7 +54,7 @@ let currentYearColumn = "duration2006";
 
 const handle = watch(
     () => viewElement.timeExtent,
-    (timeExtent) => {
+    () => {
         if (seasonChips.selectedItems[0].value === "max-warnings") {
             applyFeatureEffect();
         }
@@ -72,3 +73,29 @@ function applyFeatureEffect() {
         excludedEffect: "opacity(35%)"
     };
 }
+
+//////////////////////////////////////////////////////////////
+//  Code snippet for watch and feature effect
+//////////////////////////////////////////////////////////////
+
+codeSnippets.editorOptions = {
+    detectIndentation: false,
+    fontSize: 18,
+    insertSpaces: true,
+    readOnly: true,
+    tabSize: 2
+};
+codeSnippets.value = `const handle = watch(
+    () => viewElement.timeExtent,
+    () => {
+        if (seasonChips.selectedItems[0].value === "max-warnings") {
+            applyFeatureEffect();
+        }
+    }
+);
+
+${applyFeatureEffect.toString()}`;
+toggleCodeAction.addEventListener("click", () => {
+    codeDialog.open = true;
+});
+

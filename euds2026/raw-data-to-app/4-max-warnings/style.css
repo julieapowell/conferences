@@ -34,3 +34,60 @@
         --calcite-color-brand: #917a6a;
         --calcite-color-text-1: #917a6a;
     }
+
+    #code-dialog {
+        --calcite-dialog-content-space: 0;
+        --calcite-dialog-min-size-x: 66.667vw;
+        --calcite-dialog-max-size-x: 66.667vw;
+        --calcite-dialog-min-size-y: 50vh;
+        --calcite-dialog-max-size-y: 50vh;
+    }
+
+    .code-dialog-content {
+        display: flex;
+        flex-direction: column;
+        box-sizing: border-box;
+        block-size: 100%;
+        min-block-size: 0;
+        overflow: hidden;
+    }
+
+    .code-dialog-content calcite-tabs {
+        display: flex;
+        flex-direction: column;
+        min-block-size: 0;
+        block-size: 100%;
+    }
+
+    .code-dialog-content calcite-tab {
+        padding: 0;
+        min-block-size: 0;
+        block-size: 100%;
+    }
+
+    .code-dialog-content calcite-tab[selected] {
+        display: flex !important;
+        flex-direction: column;
+        inline-size: 100% !important;
+    }
+
+    .code-dialog-content calcite-tab:not([selected]) {
+        display: none !important;
+    }
+
+    #code-snippets {
+        flex: 1 1 auto;
+        inline-size: 100%;
+        min-block-size: 0;
+    }
+
+    #toggle-code {
+        filter: drop-shadow(0 3px 8px rgb(0 0 0 / 18%));
+    }
+
+    @media (max-width: 700px) {
+        #code-dialog {
+            --calcite-dialog-min-size-x: calc(100vw - 2rem);
+            --calcite-dialog-max-size-x: calc(100vw - 2rem);
+        }
+    }

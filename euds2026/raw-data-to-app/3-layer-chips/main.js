@@ -1,11 +1,13 @@
-const timeUtils = await $arcgis.import("@arcgis/core/support/timeUtils.js");
 const viewElement = document.querySelector("arcgis-map");
 const calciteNavLogo = document.querySelector("calcite-navigation-logo");
-const timeBar = document.querySelector("arcgis-time-bar");
+const toggleCodeAction = document.getElementById("toggle-code");
+const codeDialog = document.getElementById("code-dialog");
+const filterCodeSnippets = document.getElementById("filter-code-snippets");
+const chipGroupSnippets = document.getElementById("chip-group-snippets");
+
 const seasonChips = document.querySelector("calcite-chip-group");
 
 await viewElement.viewOnReady();
-await timeBar.componentOnReady();
 const { title, description } = viewElement.map.portalItem;
 
 if (calciteNavLogo) {
@@ -34,3 +36,27 @@ function changeLayerVisibility() {
         selectedSeason.visible = true;
     }
 }
+
+//////////////////////////////////////////////////////
+//  Code snippets
+//////////////////////////////////////////////////////
+
+const editorOptions = {
+    detectIndentation: false,
+    fontSize: 18,
+    insertSpaces: true,
+    readOnly: true,
+    tabSize: 2
+};
+filterCodeSnippets.editorOptions = editorOptions;
+chipGroupSnippets.editorOptions = editorOptions;
+filterCodeSnippets.value = changeLayerVisibility.toString();
+const chipGroupMarkup = seasonChips.outerHTML;
+const markupLines = chipGroupMarkup.split("\n");
+const baseIndentation = markupLines.at(-1).match(/^\s*/)[0];
+chipGroupSnippets.value = markupLines
+    .map((line) => line.startsWith(baseIndentation) ? line.slice(baseIndentation.length) : line)
+    .join("\n");
+toggleCodeAction.addEventListener("click", () => {
+    codeDialog.open = true;
+});
